@@ -1,28 +1,39 @@
 # Dainty
 拥有基本功能的小型浏览器
 
-    `WebView`采用腾讯TBS内核,多标签浏览窗口采用`ViewPager+Fragment`<br>
-    三个数据库表“historyTB”、“queryTB”、“collectionTB”分别记录历史信息，搜索信息，收藏信息
+
     
 ## 效果图
 ![image](https://github.com/Z-bm/Dainty/blob/master/img/start.gif) &emsp; ![image](https://github.com/Z-bm/Dainty/blob/master/img/query.gif) &emsp;
-![image](https://github.com/Z-bm/Dainty/blob/master/img/collection.gif)
+![image](https://github.com/Z-bm/Dainty/blob/master/img/label.gif) &emsp;
 ![image](https://github.com/Z-bm/Dainty/blob/master/img/settings.gif)
 
+<br>注：以上为三星真机（API 21）测试效果
+
+    `WebView`采用腾讯TBS内核,支持登录信息保存及网页视频全屏播放（根据App是否联网设置不同的网页缓存模式）；<br>
+    多标签页浏览窗口采用`ViewPager+Fragment`方式设计；<br>
+    三个数据库表“historyTB”、“queryTB”、“collectionTB”，分别记录浏览历史信息，搜索历史信息，收藏网址信息；<br>
+    historyTB表有待添加自动删除一个月前历史的功能。
+    
 ### 基本功能 <br>
 * 天气定位<br>
 * 语音识别搜索<br>
 * 账户登陆 <br>
-* 文件下载<br>
-* 历史/书签记录<br>
+* 文件下载，目前暂时不支持断点续传<br>
+* 历史/书签记录，网页浏览历史只显示最近一个月的记录<br>
 * 收藏书签<br>
-* 网页浏览<br>
+* 网页浏览基本操作<br>
 * 软件设置<br>
-### 第三方库 <br>
-* EventBus
-* Butterknife
-* TBS_sdk
-* BaiduLBS
-* 百度语音识别包
 
-有待性能优化
+### 使用到的第三方库 <br>
+* EventBus &nbsp;&nbsp; ——用于触发标签页删除功能
+* Butterknife &nbsp;&nbsp;——替代findViewById和点击事件监听
+* TBS_sdk &nbsp;&nbsp;——替代原生WebView
+* BaiduLBS &nbsp;&nbsp;——用于侧滑菜单的城市显示和天气显示
+* audiobd_speech_sdk &nbsp;&nbsp;——用于支持搜索功能语音输入
+
+---
+已适配Android 6.0+的动态权限管理，目前仍在不断优化中...<br>
+
+    觉得不错的话就Star一下，谢谢<br>
+    本人QQ号：1638072596，微信号：zbm33960
