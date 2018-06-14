@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryBlue">#4682B4</color>
+    <color name="bottom_bar_background">#F2F2F2</color>
+    <color name="light_gray">#dbdbdb</color>
+    <color name="theme_color_1">#474747</color>
+    <color name="theme_color_2">#3A5FCD</color>
+    <color name="theme_color_3">#EE7621</color>
+    <color name="theme_color_4">#8B0000</color>
+    <color name="theme_color_5">#8B4C39</color>
+    <color name="RoundFillColor">#45C3E5</color>
+    <color name="tab_selected">#DFE4D8</color>
+    <color name="tab_default">#AAB7AF</color>
+    <color name="text_color_black">#000000</color>
+    <color name="text_color_deep_gray">#5B5B5B</color>
+</resources>

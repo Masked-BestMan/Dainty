@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="size_name">
+        <item>小</item>
+        <item>中</item>
+        <item>标准</item>
+        <item>大</item>
+        <item>特大</item>
+    </string-array>
+    <string-array name="size_value">
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>125</item>
+        <item>150</item>
+    </string-array>
+    <string-array name="color_name">
+        <item>高雅灰</item>
+        <item>科技蓝</item>
+        <item>欢乐橙</item>
+        <item>尊贵红</item>
+        <item>古典褐</item>
+    </string-array>
+    <string-array name="color_value">
+        <item>#474747</item>
+        <item>#3A5FCD</item>
+        <item>#EE7621</item>
+        <item>#8B0000</item>
+        <item>#8B4C39</item>
+    </string-array>
+    <string-array name="cache_name">
+        <item>Cookies</item>
+        <item>网页缓存</item>
+        <item>本地存储</item>
+    </string-array>
+    <string-array name="cache_value">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+</resources>

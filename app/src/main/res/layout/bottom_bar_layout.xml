@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zbm.dainty.widget.BottomBarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:layout_alignParentBottom="true"
+    android:background="@color/bottom_bar_background">
+    <ImageView
+        android:id="@+id/web_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="20dp"
+        android:src="@drawable/web_backward" />
+    <ImageView
+        android:id="@+id/web_next"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:src="@drawable/web_forward" />
+    <ImageView
+        android:id="@+id/web_multi"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="55dp"
+        android:layout_toEndOf="@+id/web_back"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/web_multi" />
+    <ImageView
+        android:id="@+id/home_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="55dp"
+        android:layout_toStartOf="@+id/web_next"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/home" />
+</com.zbm.dainty.widget.BottomBarLayout>

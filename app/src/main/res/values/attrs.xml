@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PreferenceWithRightIcon">
+        <attr name="left_title" format="string"/>
+        <attr name="right_title" format="string"/>
+        <attr name="type" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="recordView">
+        <attr name="middleLineColor" format="reference|integer"/>
+    </declare-styleable>
+</resources>

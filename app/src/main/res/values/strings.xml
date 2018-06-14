@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">雅致浏览器</string>
+    <string name="collection_edit_title">网址收藏</string>
+    <string name="collection_edit_confirm_button">确定</string>
+    <string name="collection_edit_to_title">收藏至</string>
+    <string name="collection_edit_to_collection">书签</string>
+    <string name="collection_edit_to_desktop">桌面</string>
+    <string name="drawer_title">天气信息</string>
+    <string name="exit">退出</string>
+    <string name="download_record_title">下载信息</string>
+    <string name="download_record_downloading">正在下载</string>
+    <string name="download_record_delete">删除</string>
+    <string name="download_record_cancel">取消</string>
+    <string name="label_fragment_title">书签</string>
+    <string name="history_fragment_title">历史</string>
+    <string name="query_title">点击搜索一下</string>
+    <string name="query_hint">搜索或输入网址</string>
+    <string name="engine_title">请选择默认搜索引擎</string>
+    <string name="engine_name1">百度</string>
+    <string name="engine_name2">360</string>
+    <string name="engine_name3">必应</string>
+    <string name="query_button_title1">搜索</string>
+    <string name="query_button_title2">取消</string>
+    <string name="query_delete_title">删除该条历史</string>
+    <string name="history_edit_title">编辑</string>
+    <string name="setting_title">更多设置</string>
+    <string name="login">账号登录</string>
+    <string name="login_account">用户名</string>
+    <string name="login_password">账号密码</string>
+    <string name="register_title">我要注册</string>
+    <string name="forget_password">忘记密码？</string>
+    <string name="login_title">登录</string>
+    <string name="recognize_button">点击说话</string>
+    <string name="popup_download_title">下载提示</string>
+    <string name="popup_download_name">文件名：</string>
+    <string name="popup_download_size">大小：</string>
+    <string name="popup_download_button1">立即下载</string>
+    <string name="popup_download_button2">取消</string>
+
+</resources>

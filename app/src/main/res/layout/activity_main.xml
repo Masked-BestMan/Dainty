@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zbm.dainty.ui.MainActivity">
+
+    <RelativeLayout
+        android:id="@+id/anchor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:id="@+id/status_bar"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"/>
+        <com.zbm.dainty.widget.ScrollLayout
+            android:id="@+id/web_layout"
+            android:layout_below="@id/status_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/toolbar_layout" />
+
+            <RelativeLayout
+                android:id="@+id/ll_dynamic_web"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/toolbar"
+                android:clickable="true"
+                android:clipChildren="false"
+                android:focusable="true">
+                <com.zbm.dainty.widget.MyViewPager
+                    android:id="@+id/web_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipChildren="false"/>
+            </RelativeLayout>
+        </com.zbm.dainty.widget.ScrollLayout>
+
+
+        <include
+            android:id="@+id/bottom_bar"
+            layout="@layout/bottom_bar_layout" />
+
+        <com.zbm.dainty.widget.BottomBarLayout
+            android:id="@+id/web_page_control_bar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:visibility="invisible">
+
+            <Button
+                android:id="@+id/add_web_page"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/add_web_page" />
+        </com.zbm.dainty.widget.BottomBarLayout>
+    </RelativeLayout>
+
+    <include
+        layout="@layout/drawer_layout"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start" />
+</android.support.v4.widget.DrawerLayout>

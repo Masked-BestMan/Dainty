@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.zbm.dainty.widget.PreferenceHead android:key="configHead" />
+    <com.zbm.dainty.widget.MingPreferenceCategory>
+        <com.zbm.dainty.widget.PreferenceWithRightIcon
+            android:key="flow"
+            app:type="1"
+            app:left_title="流量消耗" />
+        <MultiSelectListPreference
+            android:key="clear_cache"
+            android:entries="@array/cache_name"
+            android:entryValues="@array/cache_value"
+            android:title="清除浏览记录"
+            android:summary="点击选择清除项"
+            android:dialogTitle="清除浏览记录"/>
+
+    </com.zbm.dainty.widget.MingPreferenceCategory>
+    <com.zbm.dainty.widget.MingPreferenceCategory>
+        <ListPreference
+            android:key="theme_color"
+            android:defaultValue="#474747"
+            android:title="更换主题色"
+            android:dialogTitle="选择一项"
+            android:entries="@array/color_name"
+            android:entryValues="@array/color_value"/>
+        <ListPreference
+            android:key="text_size"
+            android:defaultValue="100"
+            android:title="字体调整"
+            android:dialogTitle="选择一项"
+            android:entries="@array/size_name"
+            android:entryValues="@array/size_value"/>
+    </com.zbm.dainty.widget.MingPreferenceCategory>
+    <com.zbm.dainty.widget.MingPreferenceCategory
+        android:title="">
+        <Preference
+            android:key="restore_default"
+            android:title="恢复默认" />
+    </com.zbm.dainty.widget.MingPreferenceCategory>
+</PreferenceScreen>

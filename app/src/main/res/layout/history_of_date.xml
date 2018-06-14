@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#f4f4f4"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingLeft="11dp">
+    <TextView
+        android:id="@+id/history_date"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:textSize="12sp"
+        android:gravity="center_vertical"
+        tools:text="今天"/>
+</android.support.constraint.ConstraintLayout>

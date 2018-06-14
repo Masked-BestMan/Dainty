@@ -1,0 +1,30 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:background">@null</item>
+        <item name="android:windowBackground">@drawable/start_background</item>
+    </style>
+
+    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="AppTheme.TransparentActivity" parent="BaseTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+    <style name="download_popWindow_animation">
+        <item name="android:windowEnterAnimation">@anim/download_window_enter</item>
+        <item name="android:windowExitAnimation">@anim/download_window_exit</item>
+    </style>
+    <style name="query_popup_animation">
+        <item name="android:windowEnterAnimation">@anim/query_engine_window_enter</item>
+        <item name="android:windowExitAnimation">@anim/query_engine_window_exit</item>
+    </style>
+
+    <style name="TabLayoutTextStyle">
+        <item name="android:textSize">20sp</item>
+    </style>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_item_selector"
+    android:paddingBottom="8dp"
+    android:paddingEnd="10dp"
+    android:paddingStart="15dp"
+    android:paddingTop="8dp">
+
+    <TextView
+        android:id="@+id/web_title"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@+id/delete_checkbox"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#000"
+        android:textSize="15sp"
+        tool:text="百度一下" />
+
+    <TextView
+        android:id="@+id/web_url"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_below="@id/web_title"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@+id/delete_checkbox"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#aaa"
+        android:textSize="12sp"
+        tool:text="www.baidu.com" />
+
+    <CheckBox
+        android:id="@+id/delete_checkbox"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentEnd="true"
+        android:focusable="false"
+        android:visibility="gone" />
+</RelativeLayout>

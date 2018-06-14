@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/history_bar_theme"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:paddingTop="32dp">
+
+        <Button
+            android:id="@+id/history_label_back"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/close_window" />
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tab_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@color/tab_selected"
+            app:tabMode="scrollable"
+            app:tabPaddingBottom="10dp"
+            app:tabSelectedTextColor="@color/tab_selected"
+            app:tabTextAppearance="@style/TabLayoutTextStyle"
+            app:tabTextColor="@color/tab_default">
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/history_tab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/history_fragment_title" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/label_tab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_fragment_title" />
+        </android.support.design.widget.TabLayout>
+    </RelativeLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/label_history_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    </android.support.v4.view.ViewPager>
+</LinearLayout>

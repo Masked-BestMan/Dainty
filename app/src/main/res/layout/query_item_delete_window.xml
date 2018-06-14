@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="120dp"
+    android:layout_height="55dp"
+    android:background="#dd262626">
+    <Button
+        android:id="@+id/deleteButton"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="?android:attr/actionButtonStyle"
+        android:textColor="@android:color/white"
+        android:text="@string/query_delete_title"/>
+</FrameLayout>

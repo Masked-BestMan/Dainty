@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:background="#f7f7f7">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:text="@string/popup_download_title"
+        android:textColor="#000"
+        android:textSize="16sp" />
+
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="15dp"
+        android:textSize="15sp"
+        android:textColor="@color/text_color_deep_gray"
+        android:text="@string/popup_download_name" />
+
+    <TextView
+        android:id="@+id/filename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView3"
+        android:layout_alignBottom="@+id/textView3"
+        android:layout_toEndOf="@+id/textView3"
+        android:singleLine="true"
+        android:ellipsize="middle"
+        android:maxEms="15"
+        android:textSize="15sp"
+        android:textColor="@color/text_color_deep_gray"
+        tool:text="测试.zip" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView3"
+        android:layout_below="@+id/filename"
+        android:layout_marginTop="10dp"
+        android:text="@string/popup_download_size"
+        android:textSize="15sp"
+        android:textColor="@color/text_color_deep_gray"
+        android:id="@+id/textView6" />
+
+    <TextView
+        android:id="@+id/file_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView6"
+        android:layout_alignBottom="@+id/textView6"
+        android:layout_toEndOf="@+id/textView6"
+        android:textSize="15sp"
+        android:textColor="@color/text_color_deep_gray"
+        tool:text="20M" />
+
+    <Button
+        android:id="@+id/download_start"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView6"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textColor="@color/colorPrimaryBlue"
+        android:background="@android:color/white"
+        android:text="@string/popup_download_button1" />
+</RelativeLayout>

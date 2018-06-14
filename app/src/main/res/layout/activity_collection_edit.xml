@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+    <RelativeLayout
+        android:id="@+id/collection_edit_bar_theme"
+        android:layout_width="match_parent"
+        android:layout_height="75dp">
+        <Button
+            android:id="@+id/collection_edit_back"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/close_window"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="35dp"
+            android:text="@string/collection_edit_title"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/collection_edit_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/collection_edit_confirm_button"
+            android:clickable="true"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="35dp"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
+            android:focusable="true"
+            tool:ignore="RelativeOverlap" />
+    </RelativeLayout>
+    <com.zbm.dainty.widget.CircleImageView
+        android:id="@+id/collection_edit_icon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="15dp"
+        android:layout_below="@id/collection_edit_bar_theme"/>
+
+    <EditText
+        android:id="@+id/collection_edit_title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/collection_edit_bar_theme"
+        android:layout_toEndOf="@id/collection_edit_icon"
+        android:layout_margin="15dp"
+        android:textColor="@color/text_color_black"
+        android:maxLines="1"
+        android:inputType="text"
+        tool:ignore="LabelFor" />
+
+    <EditText
+        android:id="@+id/collection_edit_url"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignStart="@+id/collection_edit_title"
+        android:layout_below="@+id/collection_edit_icon"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="15dp"
+        android:textColor="@color/text_color_black"
+        android:maxLines="1"
+        android:inputType="textUri"
+        tool:ignore="LabelFor" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/collection_edit_url"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:text="@string/collection_edit_to_title"
+        android:textColor="@color/text_color_deep_gray"
+        android:id="@+id/textView5" />
+
+    <CheckBox
+        android:id="@+id/edit_to_collection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView5"
+        android:layout_alignTop="@+id/textView5"
+        android:layout_marginTop="30dp"
+        android:text="@string/collection_edit_to_collection" />
+
+    <CheckBox
+        android:id="@+id/edit_to_desktop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/edit_to_collection"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:text="@string/collection_edit_to_desktop" />
+
+</RelativeLayout>

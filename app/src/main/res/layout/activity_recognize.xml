@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:background="#fff">
+    <Button
+        android:id="@+id/close_window"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:drawable/ic_menu_close_clear_cancel"
+        android:layout_alignParentEnd="true"/>
+    <TextView
+        android:id="@+id/recognizeResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:layout_marginTop="70dp"
+        android:gravity="center"
+        android:textColor="@color/text_color_deep_gray"
+        tool:text="没有听清 试试这样说"/>
+
+    <!-- 带添加音量提示-->
+    <com.zbm.dainty.widget.RecordView
+        android:id="@+id/recordView"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="70dp"
+        android:visibility="visible"/>
+    <TextView
+        android:id="@+id/startRecognize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
+        android:gravity="center"
+        android:text="@string/recognize_button"
+        android:textColor="@color/text_color_deep_gray"
+        android:drawableBottom="@drawable/voice_recognition"
+        android:visibility="invisible"
+        android:focusable="true" />
+</RelativeLayout>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:background="#f4f4f4"
+    android:paddingTop="10dp"
+    android:paddingStart="10dp"
+    android:paddingBottom="15dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="@string/engine_title"
+        android:id="@+id/textView" />
+
+    <TextView
+        android:id="@+id/baidu_engine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="15dp"
+        android:drawablePadding="5dp"
+        android:drawableTop="@drawable/baidu_icon"
+        android:text="@string/engine_name1"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/s360_engine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="50dp"
+        android:layout_toEndOf="@+id/baidu_engine"
+        android:drawablePadding="5dp"
+        android:drawableTop="@drawable/s360_icon"
+        android:text="@string/engine_name2"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/biying_engine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="130dp"
+        android:layout_toEndOf="@+id/baidu_engine"
+        android:drawablePadding="5dp"
+        android:drawableTop="@drawable/biying_icon"
+        android:text="@string/engine_name3"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+</RelativeLayout>

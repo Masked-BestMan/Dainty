@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="120dp"
+    android:layout_height="110dp"
+    android:background="#dd262626">
+    <Button
+        android:id="@+id/editButton"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        style="?android:attr/actionButtonStyle"
+        android:textColor="@android:color/white"
+        android:text="@string/history_edit_title"/>
+
+    <Button
+        android:id="@+id/deleteButton1"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        style="?android:attr/actionButtonStyle"
+        android:textColor="@android:color/white"
+        android:text="@string/query_delete_title"/>
+</LinearLayout>
