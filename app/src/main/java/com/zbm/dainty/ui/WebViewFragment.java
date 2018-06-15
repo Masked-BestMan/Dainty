@@ -24,6 +24,7 @@ import com.zbm.dainty.widget.MingWebView;
 
 
 public class WebViewFragment extends android.support.v4.app.Fragment {
+    private Bundle bundle;
     private OnWebViewListener wl;
     private MingWebView webView;
     private View cache;
@@ -32,14 +33,14 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
     }
 
     @SuppressLint("ValidFragment")
-    public WebViewFragment(OnWebViewListener onWebViewListener) {
+    public WebViewFragment(Bundle savedInstanceState,OnWebViewListener onWebViewListener) {
+        bundle=savedInstanceState;
         this.wl = onWebViewListener;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         if (cache == null) {
             cache = inflater.inflate(R.layout.webview_fragment, container, false);
             webView = cache.findViewById(R.id.web_view);   //TBS WebView必须在布局中创建，否则网页视频无法全屏
@@ -48,14 +49,14 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
             webView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public void onReceivedTitle(WebView view, String title) {
-                    wl.onReceivedTitle(view, title);
+                    if (wl!=null)wl.onReceivedTitle(view, title);
                     super.onReceivedTitle(view, title);
                 }
 
 
                 @Override
                 public void onProgressChanged(WebView webView, int i) {
-                    wl.onProgressChanged(webView, i);
+                    if (wl!=null)wl.onProgressChanged(webView, i);
                     super.onProgressChanged(webView, i);
                 }
             });
@@ -79,13 +80,13 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
                     Log.d("appo", "onPageStarted" + url);
-                    wl.onPageStarted(view, url, favicon);
+                    if (wl!=null)wl.onPageStarted(view, url, favicon);
                     super.onPageStarted(view, url, favicon);
                 }
 
                 @Override
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    wl.onReceivedError(view, errorCode, description, failingUrl);
+                    if (wl!=null)wl.onReceivedError(view, errorCode, description, failingUrl);
                     super.onReceivedError(view, errorCode, description, failingUrl);
                 }
             });
@@ -99,7 +100,11 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
                     }
                 }
             });
-            webView.loadUrl("file:///android_asset/index.html");
+            if (bundle!=null)
+                webView.restoreState(bundle);
+             else
+                webView.loadUrl("file:///android_asset/index.html");
+
             if (wl != null)
                 wl.onGetWebView(webView);  //新添加的fragment
             webViewContainer= cache.findViewById(R.id.frame_layout);
@@ -123,14 +128,15 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
 
     @Override
     public void onDestroy() {
-        wl = null;
+        Log.d("Dainty","Fragment onDestroy");
+//        wl = null;
         webView.stopLoading();
         webView.removeAllViews();
         webView.destroy();
         webViewContainer.removeAllViews();
-        webViewContainer=null;
-        webView = null;
-        cache = null;
+//        webViewContainer=null;
+//        webView = null;
+//        cache = null;
         super.onDestroy();
     }
 

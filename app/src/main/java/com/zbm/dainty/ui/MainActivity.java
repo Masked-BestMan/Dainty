@@ -17,6 +17,7 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -42,7 +43,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.tencent.smtt.sdk.CookieManager;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.zbm.dainty.widget.CircleImageView;
@@ -64,6 +64,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.pref_settings, true);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         ButterKnife.bind(this);
-        initView();
+        initView(savedInstanceState);
     }
 
     @Override
@@ -200,6 +201,19 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl(url);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        List<Bundle> bundles=new ArrayList<>();
+        for (WebViewFragment fragment:WebPage.webpagelist) {
+            Bundle save=new Bundle();
+            fragment.getInnerWebView().saveState(save);
+            bundles.add(save);
+
+        }
+        outState.putInt("web_page_count",WebPage.webpagelist.size());
+        outState.putParcelableArrayList("web_page_bundle", (ArrayList<? extends Parcelable>) bundles);
+    }
 
     @Override
     protected void onStop() {
@@ -209,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.d("Dainty","onDestroy");
         super.onDestroy();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("isDownloading", false).apply();
@@ -238,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void initView() {
+    private void initView(Bundle savedInstanceState) {
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         menuAdapter = new MenuListAdapter(this);
         listView.setAdapter(menuAdapter);
@@ -260,15 +275,23 @@ public class MainActivity extends AppCompatActivity {
                 return mViewPager.dispatchTouchEvent(event);
             }
         });
-        mViewPager.setPageMargin(40);
+        mViewPager.setPageMargin(50);
         webpageAdapter = new WebPageAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(webpageAdapter);
-        WebViewFragment fragment = new WebViewFragment(initWebView());
-        WebPage.webpagelist.add(fragment);
+
+        if (savedInstanceState!=null) {
+            List<Bundle> bundles=savedInstanceState.getParcelableArrayList("web_page_bundle");
+            int count = savedInstanceState.getInt("web_page_count");
+            for (int i=0;i<count;i++) {
+                WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null,initWebView());
+                WebPage.webpagelist.add(fragment);
+            }
+        }else {
+            WebViewFragment fragment = new WebViewFragment( null,initWebView());
+            WebPage.webpagelist.add(fragment);
+        }
         webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
         mViewPager.setOffscreenPageLimit(10);
-
-        Log.d("cache", "接受Cookie：" + CookieManager.getInstance().acceptCookie());
     }
 
     @OnItemClick(R.id.menu_list)
@@ -342,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
                 if (WebPage.webpagelist.size() >= 10) {
                     Toast.makeText(this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
                 } else {
-                    WebViewFragment fragment = new WebViewFragment(initWebView());
+                    WebViewFragment fragment = new WebViewFragment(null,initWebView());
                     WebPage.webpagelist.add(fragment);
                     webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
                     fixWebPage(WebPage.webpagelist.size() - 1);
@@ -367,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
     private void ZoomChange(int flag) {
         //0为缩小，1为放大
         if (flag == 0) {
+            Log.d("Dainty","webView"+webView);
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
             isZoom = true;
             webView.onPause();
@@ -425,6 +449,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGetWebView(final MingWebView webView) {
                 //调用代表为新添加的webview
+
                 if (first) {
                     MainActivity.this.webView = webView;
                     first = false;
@@ -437,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
                         webLayout.scrollBy(0, dy);
                     }
                 });
+                Log.d("Dainty","调用getView:"+MainActivity.this.webView);
             }
 
             @Override
@@ -521,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
                 webpageAdapter.notifyDataSetChanged(WebPageAdapter.DELETE_PAGE);
                 if (WebPage.webpagelist.size() == 0) {
                     first = true;
-                    WebViewFragment fragment = new WebViewFragment(initWebView());
+                    WebViewFragment fragment = new WebViewFragment(null,initWebView());
                     WebPage.webpagelist.add(fragment);
                     webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
                     ZoomChange(1);
