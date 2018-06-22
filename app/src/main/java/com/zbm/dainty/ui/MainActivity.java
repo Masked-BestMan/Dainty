@@ -22,6 +22,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,7 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -45,8 +47,10 @@ import android.widget.Toast;
 
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
+import com.zbm.dainty.task.DownloaderTask;
+import com.zbm.dainty.util.DownloadHelper;
+import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.CircleImageView;
-import com.zbm.dainty.DaintyApplication;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.adapter.MenuListAdapter;
 import com.zbm.dainty.bean.MessageEvent;
@@ -62,6 +66,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
     MyViewPager mViewPager;
     @BindView(R.id.web_layout)
     ScrollLayout webLayout;
+    @BindView(R.id.dot_indicator)
+    LinearLayout indicator;
 
     private MingWebView webView;
     private WebPageAdapter webpageAdapter;
@@ -132,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean first = true;  //有两种含义：第一次运行app时或标签页最后一页被删后需要重新定位当前webview对象
     private boolean isZoom = false;  //是否缩放
     private SharedPreferences preferences;
-
+    private int firstPosition=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -223,10 +230,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.d("Dainty","onDestroy");
         super.onDestroy();
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("isDownloading", false).apply();
         WebPage.webpagelist.clear();
         unregisterReceiver(networkChange);
         unregisterReceiver(refresh);
@@ -275,10 +279,9 @@ public class MainActivity extends AppCompatActivity {
                 return mViewPager.dispatchTouchEvent(event);
             }
         });
-        mViewPager.setPageMargin(50);
+        mViewPager.setPageMargin(MyUtil.dip2px(this,50));
         webpageAdapter = new WebPageAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(webpageAdapter);
-
         if (savedInstanceState!=null) {
             List<Bundle> bundles=savedInstanceState.getParcelableArrayList("web_page_bundle");
             int count = savedInstanceState.getInt("web_page_count");
@@ -286,12 +289,55 @@ public class MainActivity extends AppCompatActivity {
                 WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null,initWebView());
                 WebPage.webpagelist.add(fragment);
             }
+            initDot(count);
         }else {
             WebViewFragment fragment = new WebViewFragment( null,initWebView());
             WebPage.webpagelist.add(fragment);
+            initDot(1);
         }
         webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
-        mViewPager.setOffscreenPageLimit(10);
+        mViewPager.setOffscreenPageLimit(7);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                indicator.getChildAt(firstPosition).setEnabled(false);
+                indicator.getChildAt(position).setEnabled(true);
+                firstPosition = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        indicator.getChildAt(0).setEnabled(true);
+    }
+
+    private void initDot(int count){
+        indicator.removeAllViews();
+        View view;
+        for (int i=0;i<count;i++){
+            //创建底部指示器(小圆点)
+            view = new View(this);
+            view.setBackgroundResource(R.drawable.dot_background);
+            view.setEnabled(false);
+            //设置宽高
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(MyUtil.dip2px(this,7), MyUtil.dip2px(this,7));
+            //设置间隔
+            if (i!=0) {
+                layoutParams.leftMargin = MyUtil.dip2px(this,6);
+            }
+            //添加到LinearLayout
+            indicator.addView(view, layoutParams);
+        }
+        Log.d("WP","当前页："+mViewPager.getCurrentItem());
+        indicator.getChildAt(count-1).setEnabled(true);
+        firstPosition=count-1;
     }
 
     @OnItemClick(R.id.menu_list)
@@ -308,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
                 webView.loadUrl("http://m.xinhuanet.com");
                 break;
             case 3:
+                //如果不是新的请求，getFavicon只能返回旧图，待修复
                 Intent intent = new Intent(MainActivity.this, CollectionEditActivity.class);
                 Bitmap icon = webView.getFavicon();
                 if (icon == null)
@@ -362,12 +409,13 @@ public class MainActivity extends AppCompatActivity {
                 ZoomChange(0);
                 break;
             case R.id.add_web_page:
-                if (WebPage.webpagelist.size() >= 10) {
+                if (WebPage.webpagelist.size() >= 8) {
                     Toast.makeText(this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
                 } else {
                     WebViewFragment fragment = new WebViewFragment(null,initWebView());
                     WebPage.webpagelist.add(fragment);
                     webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
+                    initDot(WebPage.webpagelist.size());
                     fixWebPage(WebPage.webpagelist.size() - 1);
                     ZoomChange(1);
                 }
@@ -390,10 +438,10 @@ public class MainActivity extends AppCompatActivity {
     private void ZoomChange(int flag) {
         //0为缩小，1为放大
         if (flag == 0) {
-            Log.d("Dainty","webView"+webView);
-            webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
+            //webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
             isZoom = true;
             webView.onPause();
+
             mViewPager.setFullScreen(false);
 
             webLayout.scrollTo(0, 0);
@@ -405,12 +453,15 @@ public class MainActivity extends AppCompatActivity {
             webPageControlBackground.setVisibility(View.VISIBLE);
             toolbar.setVisibility(View.INVISIBLE);
             bottomBar.setVisibility(View.INVISIBLE);
-
+            indicator.setVisibility(View.VISIBLE);
 
         } else {
-            webView.setLayerType(View.LAYER_TYPE_NONE,null);
+
+            webView = WebPage.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView(); //定位当前的webview对象
+            //webView.setLayerType(View.LAYER_TYPE_NONE,null);
             isZoom = false;
             webView.onResume();
+
             mViewPager.setFullScreen(true);
 
             mViewPager.clearAnimation();
@@ -419,9 +470,8 @@ public class MainActivity extends AppCompatActivity {
             webPageControlBackground.setVisibility(View.INVISIBLE);
             toolbar.setVisibility(View.VISIBLE);
             bottomBar.setVisibility(View.VISIBLE);
+            indicator.setVisibility(View.INVISIBLE);
 
-
-            webView = WebPage.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView(); //定位当前的webview对象
 
             //防止viewpager滑动错位
             fixWebPage(mViewPager.getCurrentItem());
@@ -552,6 +602,7 @@ public class MainActivity extends AppCompatActivity {
                     webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
                     ZoomChange(1);
                 }
+                initDot(WebPage.webpagelist.size());
             }
 
             @Override
@@ -565,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void fixWebPage(int position) {
         try {
-            Field field = mViewPager.getClass().getField("mCurItem");
+            Field field = mViewPager.getClass().getDeclaredField("mCurItem");
             field.setAccessible(true);
             field.setInt(mViewPager, position);
         } catch (Exception e) {
@@ -670,19 +721,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkDownloadTask() {
-        if (preferences.getBoolean("isDownloading", false)) {
+        if (DownloadHelper.downloadList.size()>0) {
             AlertDialog.Builder normalDialog =
                     new AlertDialog.Builder(this);
             normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
                     .setTitle("退出提示")
-                    .setMessage("有下载任务正在进行，退出浏览器将删除临时文件，仍要退出？")
+                    .setMessage("有下载任务正在进行，退出浏览器将删除临时下载文件，仍要退出？")
                     .setPositiveButton("确定",
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    if (!((DaintyApplication) MainActivity.this.getApplication()).getTemporaryDownloadFile().delete()) {
-                                        Log.d("sas", "删除失败");
+                                    for (DownloaderTask task:DownloadHelper.downloadList){
+                                        task.cancel(true);
+                                        new File(task.getFilePath()).delete();
                                     }
+                                    DownloadHelper.downloadList.clear();
                                     MainActivity.super.onBackPressed();
                                 }
                             })

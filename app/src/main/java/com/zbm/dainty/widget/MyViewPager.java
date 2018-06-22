@@ -64,41 +64,39 @@ public class MyViewPager extends ViewPager implements OnGestureListener{
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            frameLayout=WebPage.webpagelist.get(getCurrentItem()).getInnerContainer();
-            measureWidth=frameLayout.getMeasuredWidth();
-            measureHeight=frameLayout.getMeasuredHeight();
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                frameLayout=WebPage.webpagelist.get(getCurrentItem()).getInnerContainer();
+                measureWidth=frameLayout.getMeasuredWidth();
+                measureHeight=frameLayout.getMeasuredHeight();
 
-            point_x = ev.getRawX();
-            point_y = ev.getRawY();
-            left = frameLayout.getLeft();
-            right = frameLayout.getRight();
-            bottom = frameLayout.getBottom();
-        }
-        if (ev.getAction() == MotionEvent.ACTION_MOVE){
+                point_x = ev.getRawX();
+                point_y = ev.getRawY();
+                left = frameLayout.getLeft();
+                right = frameLayout.getRight();
+                bottom = frameLayout.getBottom();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float mov_x = ev.getRawX() - point_x;
+                float mov_y = ev.getRawY() - point_y;
+                Log.d("trr","mov_y"+mov_y);
+                if(Math.abs(mov_x) < Math.abs(mov_y)&&canDel&&mov_y<frameLayout.getWidth()/4){
+                    frameLayout.measure(MeasureSpec.makeMeasureSpec(measureWidth,MeasureSpec.AT_MOST),MeasureSpec.makeMeasureSpec(measureHeight,MeasureSpec.AT_MOST));
+                    frameLayout.layout(left, (int) mov_y, right, bottom + (int) mov_y);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.d("trr","frameLayout:"+frameLayout
+                        .getTop());
+                if(Math.abs(frameLayout.getTop())>frameLayout.getWidth()/2){
+                    EventBus.getDefault().post(new MessageEvent(frameLayout.getTop()));
 
-            float mov_x = ev.getRawX() - point_x;
-            float mov_y = ev.getRawY() - point_y;
-            Log.d("trr","mov_y"+mov_y);
-            if(Math.abs(mov_x) < Math.abs(mov_y)&&canDel){
-                frameLayout.measure(MeasureSpec.makeMeasureSpec(measureWidth,MeasureSpec.AT_MOST),MeasureSpec.makeMeasureSpec(measureHeight,MeasureSpec.AT_MOST));
-                frameLayout.layout(left, (int) mov_y, right, bottom + (int) mov_y);
-            }
-
-        }
-        if (ev.getAction() == MotionEvent.ACTION_UP){
-            Log.d("trr","frameLayout:"+frameLayout
-            .getTop());
-            if(Math.abs(frameLayout.getTop())>frameLayout.getWidth()/2){
-                EventBus.getDefault().post(new MessageEvent(frameLayout.getTop()));
-
-            }else {
-                ObjectAnimator objectAnimator=ObjectAnimator.ofFloat(frameLayout,"translationY",frameLayout.getTop(),0);
-                objectAnimator.setDuration(400).start();
-                frameLayout.measure(MeasureSpec.makeMeasureSpec(measureWidth,MeasureSpec.AT_MOST),MeasureSpec.makeMeasureSpec(measureHeight,MeasureSpec.AT_MOST));
-                frameLayout.layout(left,0,right,bottom);
-            }
-                
+                }else {
+                    ObjectAnimator objectAnimator=ObjectAnimator.ofFloat(frameLayout,"translationY",frameLayout.getTop(),0);
+                    objectAnimator.setDuration(400).start();
+                    frameLayout.measure(MeasureSpec.makeMeasureSpec(measureWidth,MeasureSpec.AT_MOST),MeasureSpec.makeMeasureSpec(measureHeight,MeasureSpec.AT_MOST));
+                    frameLayout.layout(left,0,right,bottom);
+                }
         }
         gestureDetector.onTouchEvent(ev);
         return super.onTouchEvent(ev);
@@ -142,8 +140,7 @@ public class MyViewPager extends ViewPager implements OnGestureListener{
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-        if(Math.abs(velocityY)>7000){
+        if(velocityY<-7000){
             EventBus.getDefault().post(new MessageEvent(frameLayout.getTop()));
             return true;
         }

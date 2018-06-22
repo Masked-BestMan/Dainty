@@ -1,5 +1,6 @@
 package com.zbm.dainty.widget;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -76,6 +77,7 @@ public class ElasticScrollView extends ScrollView {
         return super.onInterceptTouchEvent(ev);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (inner == null) {
@@ -163,10 +165,7 @@ public class ElasticScrollView extends ScrollView {
     public boolean isNeedMove() {
         int offset = inner.getMeasuredHeight() - getHeight();
         int scrollY = getScrollY();
-        if (scrollY == 0 || scrollY == offset) {
-            return true;
-        }
-        return false;
+        return scrollY == 0 || scrollY == offset;
     }
 
 }

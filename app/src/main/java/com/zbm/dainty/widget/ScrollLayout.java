@@ -13,14 +13,12 @@ import com.zbm.dainty.R;
  */
 
 public class ScrollLayout extends RelativeLayout {
-    private Context context;
     private View mTop;
     private int mTopViewHeight;
     private OverScroller mScroller;
 
     public ScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
         mScroller = new OverScroller(context);
     }
 

@@ -40,7 +40,6 @@ public class HistoryAndLabelActivity extends SwipeBackActivity {
     TabLayout tabBar;
 
 
-    private FragmentPagerAdapter mAdapter;
     private List<Fragment> mFragments;
     private String[] tabTitle={"历史","书签"};
 
@@ -77,13 +76,14 @@ public class HistoryAndLabelActivity extends SwipeBackActivity {
         mFragments.add(new HistoryFragment());
         mFragments.add(new LabelFragment());
         //初始化适配器
-        mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+        FragmentPagerAdapter mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
 
             @Override
             public CharSequence getPageTitle(int position) {
 
                 return tabTitle[position];
             }
+
             @Override
             public Fragment getItem(int position) {//从集合中获取对应位置的Fragment
                 return mFragments.get(position);

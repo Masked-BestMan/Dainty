@@ -20,6 +20,7 @@ import android.widget.RelativeLayout;
 import com.zbm.dainty.adapter.CollectionListAdapter;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.R;
+import com.zbm.dainty.util.MyUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +95,11 @@ public class LabelFragment extends Fragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedPosition= position;
-                deleteWindow.showAsDropDown(view, 50, 50, Gravity.BOTTOM);
+                if (!selectMoreBar.isShown()) {
+                    int[] positions = new int[2];
+                    view.getLocationOnScreen(positions);
+                    deleteWindow.showAtLocation(view, Gravity.TOP | Gravity.END, 50, positions[1] + MyUtil.dip2px(getActivity(), 60));
+                }
                 return true;
             }
         });
@@ -111,18 +116,16 @@ public class LabelFragment extends Fragment {
             }
         });
         Button deleteButton = contentView.findViewById(R.id.deleteButton1);
-        deleteButton.setText("删除该书签");
+        deleteButton.setText("删除该条书签");
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-                //db.delete(SQLiteHelper.CTB_NAME, "collectionID=?", new String[]{String.valueOf(mData.get(selectedPosition).get("id"))});
                 DaintyDBHelper.getDaintyDBHelper(getActivity()).deleteTableItem(DaintyDBHelper.CTB_NAME,"where collectionID="+mData.get(selectedPosition).get("id"));
                 getCollection();
                 deleteWindow.dismiss();
             }
         });
-        deleteWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.WRAP_CONTENT,
+        deleteWindow = new PopupWindow(contentView, MyUtil.dip2px(getActivity(),120),
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         deleteWindow.setFocusable(true);
         deleteWindow.setOutsideTouchable(true);
@@ -130,11 +133,6 @@ public class LabelFragment extends Fragment {
         confirmDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-                //for (int i = 0; i < selectedItemList.size(); i++) {
-                    //db.delete(SQLiteHelper.CTB_NAME, "collectionID=?", new String[]{String.valueOf(mData.get(selectedItemList.get(i)).get("id"))});
-                //}
                 StringBuilder sb=new StringBuilder();
                 sb.append("where collectionID in (");
                 for (int i=0;i<selectedItemList.size();i++){

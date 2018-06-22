@@ -48,7 +48,7 @@ public class QueryListAdapter extends BaseAdapter {
         ViewHolder holder ;
         if(view==null){
             holder=new ViewHolder();
-            view=mInflater.inflate(R.layout.query_list_item,null);
+            view=mInflater.inflate(R.layout.query_list_item,viewGroup,false);
             holder.typeImage=view.findViewById(R.id.type_image);
             holder.queryTitle=view.findViewById(R.id.query_title);
             holder.copy=view.findViewById(R.id.copy_button);
@@ -78,9 +78,9 @@ public class QueryListAdapter extends BaseAdapter {
     public interface OnFillingClickListener{
         void onFilling(String text);
     }
-    public final class ViewHolder{
-        public ImageView typeImage;
-        public TextView queryTitle;
-        public Button copy;
+    private static class ViewHolder{
+        ImageView typeImage;
+        TextView queryTitle;
+        Button copy;
     }
 }

@@ -90,7 +90,8 @@
             android:theme="@style/AppTheme.TransparentActivity"/>
         <activity android:name=".ui.DownloadRecordActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.TransparentActivity"/>
+            android:theme="@style/AppTheme.TransparentActivity"
+            android:launchMode="singleTop"/>
     </application>
 
 </manifest>

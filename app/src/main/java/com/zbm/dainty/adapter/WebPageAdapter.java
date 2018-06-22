@@ -13,7 +13,7 @@ import com.zbm.dainty.ui.WebViewFragment;
  * Created by Zbm阿铭 on 2017/11/2.
  */
 
-public class WebPageAdapter extends FragmentPagerAdapter {
+public class WebPageAdapter extends UpdatableFragmentPagerAdapter {
     private FragmentManager fm;
     public static final int ADD_PAGE=0;
     public static final int DELETE_PAGE=1;
@@ -42,20 +42,20 @@ public class WebPageAdapter extends FragmentPagerAdapter {
     public int getCount() {
         return WebPage.webpagelist.size();
     }
-    @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        return super.instantiateItem(container,position);
-    }
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        Log.d("WebView","调用了destroyItem");
-        if(notifyType==1&&position==deleteItem){
-            fm.beginTransaction().remove((Fragment) object).commit();
-            deleteItem=-1;
-            return;
-        }
-        super.destroyItem(container, position, object);
-    }
+//    @Override
+//    public Object instantiateItem(ViewGroup container, int position) {
+//        return super.instantiateItem(container,position);
+//    }
+//    @Override
+//    public void destroyItem(ViewGroup container, int position, Object object) {
+//        Log.d("WebView","调用了destroyItem");
+//        if(notifyType==1&&position==deleteItem){
+//            fm.beginTransaction().remove((Fragment) object).commit();
+//            deleteItem=-1;
+//            return;
+//        }
+//        super.destroyItem(container, position, object);
+//    }
 
     public int getDeleteItem() {
         return deleteItem;

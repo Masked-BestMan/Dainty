@@ -10,15 +10,18 @@
         android:id="@+id/anchor"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <FrameLayout
             android:id="@+id/status_bar"
             android:layout_width="match_parent"
-            android:layout_height="25dp"/>
+            android:layout_height="25dp" />
+
         <com.zbm.dainty.widget.ScrollLayout
             android:id="@+id/web_layout"
-            android:layout_below="@id/status_bar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_below="@id/status_bar">
+
             <include
                 android:id="@+id/toolbar"
                 layout="@layout/toolbar_layout" />
@@ -31,12 +34,23 @@
                 android:clickable="true"
                 android:clipChildren="false"
                 android:focusable="true">
+
                 <com.zbm.dainty.widget.MyViewPager
                     android:id="@+id/web_container"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:clipChildren="false"/>
+                    android:clipChildren="false" />
             </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/dot_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginBottom="60dp"
+                android:layout_alignParentBottom="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="invisible" />
         </com.zbm.dainty.widget.ScrollLayout>
 
 
@@ -49,13 +63,14 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
+            android:gravity="center"
             android:visibility="invisible">
 
             <Button
                 android:id="@+id/add_web_page"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_centerInParent="true"
+                android:layout_gravity="center"
                 android:background="@drawable/add_web_page" />
         </com.zbm.dainty.widget.BottomBarLayout>
     </RelativeLayout>

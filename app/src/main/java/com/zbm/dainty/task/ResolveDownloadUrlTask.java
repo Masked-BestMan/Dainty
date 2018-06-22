@@ -17,8 +17,8 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zbm.dainty.DaintyApplication;
 import com.zbm.dainty.R;
+import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
 
 import java.io.File;
@@ -33,17 +33,18 @@ import java.util.regex.Pattern;
  * Created by zbm阿铭 on 2018/3/21.
  */
 @SuppressLint("StaticFieldLeak")
-public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
+public class ResolveDownloadUrlTask extends AsyncTask<String, Void, Integer> {
 
     private Context context;
     private HttpURLConnection conn;
     private String fileName;
     private PopupWindow myPopupWindow;
-    private View anchor;
-    private File file;// 存储路径
-    public ResolveDownloadUrlTask(Context context,View anchor){
-        this.context=context;
-        this.anchor=anchor;
+    private View anchor;   //弹出窗口的依附控件
+    private File file;   // 存储路径
+
+    public ResolveDownloadUrlTask(Context context, View anchor) {
+        this.context = context;
+        this.anchor = anchor;
     }
 
     @Override
@@ -52,7 +53,6 @@ public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
         File directory;
         try {
             downloadUrl = URLDecoder.decode(strings[0], "UTF-8");
-            Log.d("tag", "url:" + downloadUrl);
             final URL url = new URL(downloadUrl);
             conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(3 * 1000);
@@ -61,10 +61,10 @@ public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
             if (conn.getResponseCode() == 200) {
                 fileName = getFileName(conn, downloadUrl);
                 directory = new File(PreferenceManager.getDefaultSharedPreferences(context).getString("downloadPath", "/storage/emulated/0/DaintyDownloads"));
-                if (!directory.exists()){
+                if (!directory.exists()) {
                     //防止默认下载目录被删除了
-                    if (!directory.mkdirs()){
-                        Log.d("tag","默认下载目录创建失败");
+                    if (!directory.mkdirs()) {
+                        Log.d("tag", "默认下载目录创建失败");
                     }
                 }
 
@@ -72,8 +72,8 @@ public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
                 do {
                     String fileName1 = fileName;
                     String[] s = new String[2];
-                    s[0]=getFileNameNoEx(fileName1);
-                    s[1]=getExtensionName(fileName1);
+                    s[0] = getFileNameNoEx(fileName1);
+                    s[1] = getExtensionName(fileName1);
                     ++i;
                     if (i != 0) {
                         s[0] = s[0] + "(" + i + ")";
@@ -115,9 +115,14 @@ public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
             @Override
             public void onClick(View v) {
                 myPopupWindow.dismiss();
-                DownloaderTask task = new DownloaderTask(context,conn,fileName);
-                task.execute(file);
-                ((DaintyApplication)((Activity)context).getApplication()).setTemporaryDownloadFile(file);
+                for (DownloaderTask task : DownloadHelper.downloadList)
+                    if (task.getFileName().equals(fileName)) {
+                        Toast.makeText(context, "已存在下载任务", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                DownloaderTask task = new DownloaderTask(context, conn, fileName,file.getAbsolutePath());
+                task.executeOnExecutor(THREAD_POOL_EXECUTOR, file);
+                DownloadHelper.downloadList.add(0, task);
             }
         });
         myPopupWindow = new PopupWindow(popupLayout, WindowManager.LayoutParams.MATCH_PARENT, MyUtil.dip2px(context, 168));
@@ -138,22 +143,22 @@ public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
 
     private String getFileName(HttpURLConnection conn, String downloadUrl) {
         String filename = null;
-        try{
+        try {
             filename = downloadUrl.substring(downloadUrl.lastIndexOf('/') + 1);  //从下载路径的字符串中获取文件名称
-        }catch (StringIndexOutOfBoundsException e){
+        } catch (StringIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
 
-        if (filename == null || "".equals(filename.trim())||!filename.contains(".")) {//如果获取不到文件名称
+        if (filename == null || "".equals(filename.trim()) || !filename.contains(".")) {//如果获取不到文件名称
             for (int i = 0; ; i++) { //无限循环遍历
                 String mine = conn.getHeaderField(i);   //从返回的流中获取特定索引的头字段值
                 if (mine == null) break;    //如果遍历到了返回头末尾这退出循环
                 if ("content-disposition".equals(conn.getHeaderFieldKey(i).toLowerCase())) {  //获取content-disposition返回头字段，里面可能会包含文件名
                     Matcher m = Pattern.compile(".*filename=(.*)").matcher(mine.toLowerCase()); //使用正则表达式查询文件名
                     if (m.find()) {
-                        filename=m.group(1); //如果有符合正则表达规则的字符串
-                        if (filename.matches("(\").*?(\")")){
-                            return filename.substring(1,filename.length()-1);
+                        filename = m.group(1); //如果有符合正则表达规则的字符串
+                        if (filename.matches("(\").*?(\")")) {
+                            return filename.substring(1, filename.length() - 1);
                         }
                     }
                 }
@@ -163,31 +168,28 @@ public class ResolveDownloadUrlTask extends AsyncTask<String,Void,Integer> {
 
         return filename;
     }
+
     /*
- * Java文件操作 获取文件扩展名
- *
- *  Created on: 2011-8-2
- *      Author: blueeagle
- */
+     * Java文件操作 获取文件扩展名
+     *
+     */
     private static String getExtensionName(String filename) {
         if ((filename != null) && (filename.length() > 0)) {
             int dot = filename.lastIndexOf('.');
-            if ((dot >-1) && (dot < (filename.length() - 1))) {
+            if ((dot > -1) && (dot < (filename.length() - 1))) {
                 return filename.substring(dot + 1);
             }
         }
         return filename;
     }
+
     /*
      * Java文件操作 获取不带扩展名的文件名
-     *
-     *  Created on: 2011-8-2
-     *      Author: blueeagle
      */
     private static String getFileNameNoEx(String filename) {
         if ((filename != null) && (filename.length() > 0)) {
             int dot = filename.lastIndexOf('.');
-            if ((dot >-1) && (dot < (filename.length()))) {
+            if ((dot > -1) && (dot < (filename.length()))) {
                 return filename.substring(0, dot);
             }
         }

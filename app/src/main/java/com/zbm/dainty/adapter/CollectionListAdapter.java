@@ -35,10 +35,6 @@ public class CollectionListAdapter extends BaseAdapter {
         mInflater=LayoutInflater.from(context);
     }
 
-    public boolean isRestoreCheckBox() {
-        return restoreCheckBox;
-    }
-
     public void setRestoreCheckBox(boolean restoreCheckBox) {
         this.restoreCheckBox = restoreCheckBox;
     }
@@ -103,7 +99,7 @@ public class CollectionListAdapter extends BaseAdapter {
         if(canSelectMore){
             holder.checkBox.setVisibility(View.VISIBLE);
         }else {
-            holder.checkBox.setVisibility(View.INVISIBLE);
+            holder.checkBox.setVisibility(View.GONE);
         }
         if (restoreCheckBox)holder.checkBox.setChecked(false);
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -120,7 +116,7 @@ public class CollectionListAdapter extends BaseAdapter {
     public interface OnCheckChangedListener{
         void onCheckChanged(int position,boolean checked);
     }
-    private final class ViewHolder{
+    private static class ViewHolder{
         CircleImageView icon;
         TextView title;
         TextView url;

@@ -9,12 +9,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Environment;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -29,23 +28,24 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.zbm.dainty.DaintyApplication;
 import com.zbm.dainty.adapter.DownloadRecordAdapter;
 import com.zbm.dainty.R;
+import com.zbm.dainty.bean.FileDownloadBean;
+import com.zbm.dainty.task.DownloaderTask;
+import com.zbm.dainty.util.DownloadHelper;
+import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.SwipeBackActivity;
+import com.zbm.dainty.widget.TextProgressBar;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -62,22 +62,14 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     View downloadRecordBarTheme;
     @BindView(R.id.download_record_back)
     Button downloadRecordBack;
-    @BindView(R.id.downloading_container)
-    View downloadContainer;
-    @BindView(R.id.downloading_file_icon)
-    ImageView downloadingFileIcon;
-    @BindView(R.id.downloading_filename)
-    TextView downloadingFilename;
-    @BindView(R.id.stop_download)
-    ImageView stopDownload;
-    @BindView(R.id.download_speed)
-    TextView downloadSpeed;
-    @BindView(R.id.download_progress)
-    ProgressBar downloadProgress;
     @BindView(R.id.download_record_list)
     ListView downloadRecordList;
+    @BindView(R.id.download_record_storage_size_bar)
+    View storageSizeBar;
+    @BindView(R.id.storage_size_progress)
+    TextProgressBar textProgressBar;
     @BindView(R.id.empty_download_record)
-    ImageView emptyRecord;
+    TextView emptyRecord;
     @BindView(R.id.download_record_select_more_bar)
     View selectMoreBar;
     @BindView(R.id.download_record_confirm_delete)
@@ -85,24 +77,22 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     @BindView(R.id.download_record_cancel_delete)
     Button cancelDelete;
 
-    private boolean isDownloading=false;
     private DownloadRecordAdapter adapter;
-    private List<Map<String,Object>> data=new ArrayList<>();
+    private List<FileDownloadBean> data = new ArrayList<>();
     private List<Integer> selectedItemList = new ArrayList<>();
     private int selectedPosition;
     private PopupWindow deleteWindow;
     private Timer timer;
-    private long lastTotalRxBytes = 0;
     private File[] files;    //下载目录内的文件
-    private UpdateDownloadSpeedHandler mHandler = new UpdateDownloadSpeedHandler(this);
+    private int downloadCount = 0;
+    private int[] firstDownloadLength;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IntentFilter mFilter=new IntentFilter();
+        IntentFilter mFilter = new IntentFilter();
         mFilter.addAction("download_progress_refresh");
-        registerReceiver(downloadStatus,mFilter);
-        lastTotalRxBytes=getTotalRxBytes();
+        registerReceiver(downloadStatus, mFilter);
         setContentView(R.layout.activity_download_record);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -118,58 +108,17 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         ButterKnife.bind(this);
         initData();
         initView();
-
     }
-    private void initView(){
-        adapter=new DownloadRecordAdapter(this,data);
+
+
+    @SuppressWarnings("ConstantConditions")
+    private void initView() {
+
+        adapter = new DownloadRecordAdapter(this, data);
         downloadRecordList.setAdapter(adapter);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         downloadRecordBarTheme.setBackgroundColor(Color.parseColor(preferences.getString("theme_color", "#474747")));
-        downloadingFileIcon.setImageResource(R.drawable.s360_icon);
-        isDownloading=preferences.getBoolean("isDownloading",false);
-        if (isDownloading){
-            timer=new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    showNetSpeed();
-                    Log.d("uuu","每隔一秒");
-                }
-            },0,1000);
-            downloadContainer.setVisibility(View.VISIBLE);
-            downloadingFilename.setText(preferences.getString("filename",""));
-            downloadProgress.setMax(preferences.getInt("total_size", 100));
-            stopDownload.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder normalDialog =
-                            new AlertDialog.Builder(DownloadRecordActivity.this);
-                    normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
-                            .setTitle("关闭下载提示")
-                            .setMessage("有下载任务正在进行，关闭下载栏将删除临时文件，仍要关闭？")
-                            .setPositiveButton("确定",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            preferences.edit().putBoolean("isCancelDownload", true).apply();
-                                            preferences.edit().putBoolean("isDownloading",false).apply();
-                                            downloadContainer.setVisibility(View.GONE);
-                                            timer.cancel();
-                                            timer=null;
-                                            if(!((DaintyApplication)DownloadRecordActivity.this.getApplication()).getTemporaryDownloadFile().delete()){
-                                                Log.d("sas","删除失败");
-                                            }
-                                        }
-                                    })
-                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                                }
-                            }).show();
-                }
-            });
-        }
         downloadRecordBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,7 +128,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         downloadRecordList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (adapter.isCanSelectMore()){
+                if (adapter.isCanSelectMore()) {
                     CheckBox itemCheckBox = view.findViewById(R.id.download_record_delete_checkbox);
                     if (itemCheckBox.isChecked()) {
                         itemCheckBox.setChecked(false);
@@ -187,8 +136,8 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                     } else {
                         itemCheckBox.setChecked(true);
                     }
-                }else {
-                    startActivity(getFileIntent((File) data.get(position).get("file_path")));
+                } else {
+                    startActivity(getFileIntent(new File(data.get(position).getFilePath())));
                 }
 
             }
@@ -196,20 +145,24 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         downloadRecordList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedPosition= position;
-                deleteWindow.showAsDropDown(view, 50, 50, Gravity.BOTTOM);
+                selectedPosition = position;
+                if (!selectMoreBar.isShown()) {
+                    int[] positions = new int[2];
+                    view.getLocationOnScreen(positions);
+                    deleteWindow.showAtLocation(view, Gravity.TOP | Gravity.END, 50, positions[1] + MyUtil.dip2px(DownloadRecordActivity.this, 60));
+                }
                 return true;
             }
         });
         adapter.setOnCheckChangedListener(new DownloadRecordAdapter.OnCheckChangedListener() {
             @Override
             public void onCheckChanged(int position, boolean checked) {
-                if (checked){
+                if (checked) {
                     selectedItemList.add(position);
-                }else {
+                } else {
                     selectedItemList.remove((Integer) position);
                 }
-                Log.d("rer","selected:"+selectedItemList.size());
+                Log.d("rer", "selected:" + selectedItemList);
             }
         });
         emptyRecord.setOnClickListener(new View.OnClickListener() {
@@ -224,7 +177,8 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        if (files!=null){
+                                        DownloadHelper.stopAllDownloads();
+                                        if (files != null) {
                                             for (File file : files) {
                                                 file.delete();
                                             }
@@ -241,6 +195,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                         }).show();
             }
         });
+        @SuppressLint("InflateParams")
         View contentView = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.history_item_delete_window, null);
         Button editButton = contentView.findViewById(R.id.editButton);
         editButton.setOnClickListener(new View.OnClickListener() {
@@ -250,6 +205,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 adapter.setCanSelectMore(true);
                 adapter.notifyDataSetInvalidated();
                 selectMoreBar.setVisibility(View.VISIBLE);
+                storageSizeBar.setVisibility(View.INVISIBLE);
                 deleteWindow.dismiss();
             }
         });
@@ -258,12 +214,17 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                data.remove(selectedPosition);
+                new File(data.get(selectedPosition).getFilePath()).delete();
+                if (selectedPosition<=DownloadHelper.downloadList.size()-1){
+                    DownloadHelper.downloadList.get(selectedPosition).cancel(true);
+                    DownloadHelper.downloadList.remove(selectedPosition);
+                }
+                initData();
                 adapter.notifyDataSetChanged();
                 deleteWindow.dismiss();
             }
         });
-        deleteWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.WRAP_CONTENT,
+        deleteWindow = new PopupWindow(contentView,  MyUtil.dip2px(this,120),
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         deleteWindow.setFocusable(true);
         deleteWindow.setOutsideTouchable(true);
@@ -271,15 +232,22 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         confirmDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("rer","selectedItemList:"+selectedItemList);
+
                 for (int i = 0; i < selectedItemList.size(); i++) {
-                    data.remove((int)selectedItemList.get(i));
+                    new File(data.get(selectedItemList.get(i)).getFilePath()).delete();
+                    Log.d("rer", "删除路径:" + data.get(selectedItemList.get(i)).getFilePath());
+                    if (selectedItemList.get(i)<=DownloadHelper.downloadList.size()-1){
+                        DownloadHelper.downloadList.get(selectedItemList.get(i)).cancel(true);
+                        DownloadHelper.downloadList.remove((int)selectedItemList.get(i));
+                    }
                 }
+                initData();
                 adapter.setRestoreCheckBox(true);
                 adapter.setCanSelectMore(false);
                 adapter.notifyDataSetInvalidated();
                 adapter.notifyDataSetChanged();
-                selectMoreBar.setVisibility(View.GONE);
+                selectMoreBar.setVisibility(View.INVISIBLE);
+                storageSizeBar.setVisibility(View.VISIBLE);
                 selectedItemList.clear();
             }
         });
@@ -289,70 +257,105 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 adapter.setCanSelectMore(false);
                 adapter.setRestoreCheckBox(true);
                 adapter.notifyDataSetInvalidated();
-                selectMoreBar.setVisibility(View.GONE);
+                selectMoreBar.setVisibility(View.INVISIBLE);
+                storageSizeBar.setVisibility(View.VISIBLE);
             }
         });
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long blockSize = statFs.getBlockSizeLong();
+            long totalBlocks = statFs.getBlockCountLong();
+            long availableBlocks = statFs.getAvailableBlocksLong();
+            String totalSize = Formatter.formatFileSize(this, blockSize * totalBlocks);
+            String availableSize = Formatter.formatFileSize(this, blockSize * availableBlocks);
+            textProgressBar.setTextAndProgress("内置存储可用：" + availableSize + "/共：" + totalSize, (int) ((float)availableBlocks / totalBlocks * 100));
+        }
     }
 
-    private void initData(){
+    private void initData() {
         data.clear();
+        downloadCount = DownloadHelper.downloadList.size();
+
+        if (downloadCount > 0) {
+            if (timer != null) timer.cancel();
+            firstDownloadLength = new int[downloadCount];
+            for (int i = 0; i < downloadCount; i++) {
+                firstDownloadLength[i] = DownloadHelper.downloadList.get(i).getProgress();
+            }
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    showNetSpeed();
+                }
+            }, 0, 1000);
+        }
         File downloadPath = new File("/storage/emulated/0/DaintyDownloads");
-        if (downloadPath.exists()){
-            files= downloadPath.listFiles();
-            if (files!=null){
-                for (int i=files.length-1;i>=0;i--){
-                    Map<String,Object> fileInfo=new HashMap<>();
-                    fileInfo.put("file_name",files[i].getName());
-                    fileInfo.put("file_size",Formatter.formatFileSize(this,files[i].length()));
-                    fileInfo.put("last_modified",files[i].lastModified());
-                    fileInfo.put("file_suffix",getFileType(files[i].getName()));
-                    fileInfo.put("file_path",files[i].getAbsoluteFile());
+        if (downloadPath.exists()) {
+            files = downloadPath.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    FileDownloadBean fileInfo = new FileDownloadBean(file.getName());
+                    DownloaderTask task=DownloadHelper.getDownloadFile(file.getAbsolutePath());
+                    if (task!=null) {
+                        fileInfo.setDownloading(true);
+                        fileInfo.setLastModified(task.getTime());
+                    }else {
+                        fileInfo.setDownloading(false);
+                        fileInfo.setLastModified(file.lastModified());
+                    }
+                    fileInfo.setFileSize(Formatter.formatFileSize(this, file.length()));
+
+                    fileInfo.setFileSuffix(getFileType(file.getName()));
+                    fileInfo.setFilePath(file.getAbsolutePath());
                     data.add(fileInfo);
                 }
+                Collections.sort(data);
+
+                Log.d("Dainty",data.toString());
             }
         }
 
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isDownloading)
-            unregisterReceiver(downloadStatus);
+        unregisterReceiver(downloadStatus);
     }
 
     /*
     每隔一秒发送一次广播
      */
-    private BroadcastReceiver downloadStatus = new BroadcastReceiver(){
+    private BroadcastReceiver downloadStatus = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("download_rec","收到广播");
-            if (intent.getBooleanExtra("finish_download",false)) {
-                timer.cancel();
-                downloadContainer.setVisibility(View.GONE);
+            Log.d("download_rec", "收到广播");
+            if (intent.getBooleanExtra("finish_download", false)) {
                 initData();
                 adapter.notifyDataSetChanged();
-            }else {
-                downloadProgress.setProgress(intent.getIntExtra("current_download_size",0));
             }
         }
     };
+
     /**
      * 根据后缀获取文件fileName的类型
+     *
      * @return String 文件的类型
      **/
-    public String getFileType(String fileName){
-        if(!fileName.equals("")&&fileName.length()>3){
-            int dot=fileName.lastIndexOf(".");
-            if(dot>0){
-                return fileName.substring(dot+1);
-            }else{
+    public String getFileType(String fileName) {
+        if (!fileName.equals("") && fileName.length() > 3) {
+            int dot = fileName.lastIndexOf(".");
+            if (dot > 0) {
+                return fileName.substring(dot + 1);
+            } else {
                 return "";
             }
         }
         return "";
     }
+
     private Intent getFileIntent(File file) {
         Uri uri = Uri.fromFile(file);
         String type = getMIMEType(file);
@@ -367,10 +370,10 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     private String getMIMEType(File f) {
         String type;
         String fName = f.getName();
-      /* 取得扩展名 */
+        /* 取得扩展名 */
         String end = fName.substring(fName.lastIndexOf(".") + 1, fName.length()).toLowerCase();
 
-      /* 依扩展名的类型决定MimeType */
+        /* 依扩展名的类型决定MimeType */
         switch (end) {
             case "pdf":
                 type = "application/pdf";//
@@ -399,48 +402,48 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 break;
 
             case "apk":
-        /* android.permission.INSTALL_PACKAGES */
+                /* android.permission.INSTALL_PACKAGES */
                 type = "application/vnd.android.package-archive";
                 break;
 
             default:
-        /*如果无法直接打开，就跳出软件列表给用户选择 */
+                /*如果无法直接打开，就跳出软件列表给用户选择 */
                 type = "*/*";
                 break;
         }
         return type;
     }
 
-    private static class UpdateDownloadSpeedHandler extends Handler{
-        private WeakReference<DownloadRecordActivity> mWeakReference;
-        private UpdateDownloadSpeedHandler(DownloadRecordActivity activity){
-            mWeakReference=new WeakReference<>(activity);
-        }
-
-        @SuppressLint("SetTextI18n")
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            DownloadRecordActivity activity=mWeakReference.get();
-            if (activity!=null)
-                activity.downloadSpeed.setText(Formatter.formatFileSize(activity,(long)msg.obj)+"/s");
-        }
-    }
+    @SuppressLint("SetTextI18n")
     private void showNetSpeed() {
 
-        long nowTotalRxBytes = getTotalRxBytes();
-        Log.d("uuu",nowTotalRxBytes+"b");
-        long speed = nowTotalRxBytes - lastTotalRxBytes;
+        if (downloadRecordList.getChildCount() != 0) {
+            if (DownloadHelper.downloadList.size() == 0 || downloadCount != DownloadHelper.downloadList.size())
+                return;
+            int downloadItemInList = 0;
+            if (downloadRecordList.getFirstVisiblePosition() < downloadCount) {
+                Log.d("Dainty","第一个可见："+downloadRecordList.getFirstVisiblePosition());
+                downloadItemInList = downloadCount - downloadRecordList.getFirstVisiblePosition();  //显示在列表中的下载条目数
+                Log.d("Dainty","下载条目："+downloadItemInList);
+            }
+            for (int i = 0; i < downloadItemInList; i++) {
+                final int j = i;
+                final int progress = DownloadHelper.downloadList.get(i).getProgress();
+                View view = downloadRecordList.getChildAt(i);
+                final ProgressBar progressBar = view.findViewById(R.id.download_progress);
+                final TextView speed = view.findViewById(R.id.download_speed);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setProgress(progress);
+                        if (progress != firstDownloadLength[j])
+                            speed.setText(Formatter.formatFileSize(DownloadRecordActivity.this, progress - firstDownloadLength[j]) + "/s");
+                        firstDownloadLength[j] = progress;
+                    }
+                });
 
-        lastTotalRxBytes = nowTotalRxBytes;
+            }
 
-        Message msg = mHandler.obtainMessage();
-        msg.what = 100;
-        msg.obj = speed ;
-
-        mHandler.sendMessage(msg);//更新界面
-    }
-    private long getTotalRxBytes() {
-        return TrafficStats.getUidRxBytes(getApplicationInfo().uid);
+        }
     }
 }

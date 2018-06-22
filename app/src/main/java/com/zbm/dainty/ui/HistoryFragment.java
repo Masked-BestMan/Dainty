@@ -21,9 +21,11 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.zbm.dainty.bean.HistoryPositionBean;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.bean.HistoryItemBean;
 import com.zbm.dainty.adapter.HistoryListAdapter;
+import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.HistoryListView;
 import com.zbm.dainty.util.IDockingHeaderUpdateListener;
 import com.zbm.dainty.R;
@@ -51,7 +53,7 @@ public class HistoryFragment extends Fragment {
     private HistoryListAdapter adapter;
     private PopupWindow deleteWindow;
     private int groupPos, childPos; //参数值是在setTag时使用的对应资源id号,标识具体删除哪个item
-    private List<Integer> selectedItemList = new ArrayList<>();  //记录要删除的item所在的childPosition groupPosition
+    private List<HistoryPositionBean> selectedItemList = new ArrayList<>();  //记录要删除的item所在的childPosition groupPosition
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,11 +77,9 @@ public class HistoryFragment extends Fragment {
             @Override
             public void onCheckChanged(int groupPosition, int childPosition, boolean checked) {
                 if (checked) {
-                    selectedItemList.add(groupPosition);
-                    selectedItemList.add(childPosition);
+                    selectedItemList.add(new HistoryPositionBean(childPosition,groupPosition));
                 } else {
-                    selectedItemList.remove(Integer.valueOf(groupPosition));
-                    selectedItemList.remove(Integer.valueOf(childPosition));
+                    selectedItemList.remove(new HistoryPositionBean(childPosition,groupPosition));
                 }
                 Log.d("aaa", "selectedItemList:" + selectedItemList);
             }
@@ -125,13 +125,15 @@ public class HistoryFragment extends Fragment {
         mList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                groupPos = (Integer) view.getTag(R.id.web_title); //参数值是在setTag时使用的对应资源id号
-                childPos = (Integer) view.getTag(R.id.web_url);
-                if (childPos != -1) {
-
-                    deleteWindow.showAsDropDown(view, 50, 50, Gravity.BOTTOM);
+                if (!selectMoreBar.isShown()) {
+                    groupPos = (Integer) view.getTag(R.id.web_title); //参数值是在setTag时使用的对应资源id号
+                    childPos = (Integer) view.getTag(R.id.web_url);
+                    if (childPos != -1) {
+                        int[] positions = new int[2];
+                        view.getLocationOnScreen(positions);
+                        deleteWindow.showAtLocation(view, Gravity.TOP | Gravity.END, 50, positions[1] + MyUtil.dip2px(getActivity(), 60));
+                    }
                 }
-
                 return true;
             }
         });
@@ -151,6 +153,7 @@ public class HistoryFragment extends Fragment {
                 adapter.setCanSelectMore(true);
                 adapter.notifyDataSetInvalidated();
                 selectMoreBar.setVisibility(View.VISIBLE);
+                emptyHistory.setVisibility(View.INVISIBLE);
                 deleteWindow.dismiss();
             }
         });
@@ -164,7 +167,7 @@ public class HistoryFragment extends Fragment {
                 deleteWindow.dismiss();
             }
         });
-        deleteWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.WRAP_CONTENT,
+        deleteWindow = new PopupWindow(contentView, MyUtil.dip2px(getActivity(),120),
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         deleteWindow.setFocusable(true);
         deleteWindow.setOutsideTouchable(true);
@@ -174,9 +177,9 @@ public class HistoryFragment extends Fragment {
             public void onClick(View view) {
                 StringBuilder sb=new StringBuilder();
                 sb.append("where historyID in (");
-                for (int i = 0; i < selectedItemList.size() - 1; i = i + 2) {
-                    sb.append(mHistoryData.get(parentList.get(selectedItemList.get(i))).get(selectedItemList.get(i + 1)).getHistoryID());
-                    if (i!=selectedItemList.size()-2){
+                for (int i = 0; i < selectedItemList.size(); i ++) {
+                    sb.append(mHistoryData.get(parentList.get(selectedItemList.get(i).getParent())).get(selectedItemList.get(i).getChild()).getHistoryID());
+                    if (i!=selectedItemList.size()-1){
                         sb.append(",");
                     }
                 }
@@ -187,6 +190,7 @@ public class HistoryFragment extends Fragment {
                 adapter.setCanSelectMore(false);
                 getHistory();     //getHistory()必须在setRestoreCheckBox和setCanSelectMore之后调用
                 selectMoreBar.setVisibility(View.GONE);
+                emptyHistory.setVisibility(View.VISIBLE);
             }
         });
         cancelDelete.setOnClickListener(new View.OnClickListener() {
@@ -196,6 +200,7 @@ public class HistoryFragment extends Fragment {
                 adapter.setRestoreCheckBox(true);
                 adapter.notifyDataSetInvalidated();
                 selectMoreBar.setVisibility(View.GONE);
+                emptyHistory.setVisibility(View.VISIBLE);
             }
         });
         getHistory();

@@ -2,30 +2,35 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="70dp"
     android:background="@drawable/list_item_selector"
-    android:paddingBottom="8dp"
-    android:paddingEnd="15dp"
-    android:paddingStart="15dp"
-    android:paddingTop="8dp">
-
+    android:padding="10dp"
+    tool:background="#fff">
+    <CheckBox
+        android:id="@+id/download_record_delete_checkbox"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="10dp"
+        android:focusable="false"
+        android:visibility="visible" />
     <ImageView
         android:id="@+id/download_record_icon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_toEndOf="@id/download_record_delete_checkbox"
         android:layout_centerVertical="true"
         tool:src="@drawable/collect"/>
     <TextView
         android:id="@+id/download_record_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_alignParentTop="true"
         android:layout_toEndOf="@id/download_record_icon"
-        android:layout_toStartOf="@+id/download_record_delete_checkbox"
         android:ellipsize="middle"
         android:textColor="#000"
-        android:textSize="18sp"
+        android:textSize="19sp"
         tool:text="百度.apk"
         android:singleLine="true" />
 
@@ -33,21 +38,10 @@
         android:id="@+id/download_record_modified_date_and_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/download_record_name"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_alignParentBottom="true"
         android:layout_toEndOf="@id/download_record_icon"
-        android:layout_toStartOf="@+id/download_record_delete_checkbox"
         android:textColor="@color/text_color_deep_gray"
         android:textSize="13sp"
         tool:text="2018年10月18日 下午12：50   1022.99MB" />
-    <CheckBox
-        android:id="@+id/download_record_delete_checkbox"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:focusable="false"
-        android:visibility="gone" />
-
 </RelativeLayout>

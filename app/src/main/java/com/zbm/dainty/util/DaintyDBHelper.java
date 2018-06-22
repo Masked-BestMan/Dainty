@@ -20,10 +20,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class DaintyDBHelper extends SQLiteOpenHelper {
     private static DaintyDBHelper helper = null;
@@ -104,7 +104,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
             @Override
             public void run() {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-                Map<String, List<HistoryItemBean>> mHistoryData = new TreeMap<>();
+                Map<String, List<HistoryItemBean>> mHistoryData = new LinkedHashMap<>();
                 List<String> parentList = new ArrayList<>();
                 List[] children;  //用于暂时记录分组成员
                 String lastDate = "";  //保持上个组的日期
@@ -156,7 +156,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                         children[key].add(new HistoryItemBean(Integer.parseInt(id), name, url));
                         lastDate = date;
                     } while (mCursor.moveToNext());
-
+                    Log.d("aaa", "日期:" + parentList);
                     //该步把所有组加入list
                     for (int i = 0; i < children.length; i++) {
                         mHistoryData.put(parentList.get(i), children[i]);
@@ -214,7 +214,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                     byte[] icon = mCursor.getBlob(mCursor.getColumnIndex("collectionICON"));
                     String name = mCursor.getString(mCursor.getColumnIndex("collectionNAME"));
                     String url = mCursor.getString(mCursor.getColumnIndex("collectionURL"));
-                    Map<String, Object> item = new TreeMap<>();
+                    Map<String, Object> item = new LinkedHashMap<>();
                     item.put("id", id);
                     item.put("icon", icon);
                     item.put("name", name);

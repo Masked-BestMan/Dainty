@@ -24,109 +24,50 @@
             android:layout_marginTop="35dp"
             android:text="@string/download_record_title"
             android:textColor="@android:color/white"
-            android:textSize="18sp" />
-    </RelativeLayout>
-    <RelativeLayout
-        android:id="@+id/downloading_container"
-        android:layout_below="@id/download_record_bar_theme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        tool:background="#fff"
-        android:visibility="gone">
-        <TextView
-            android:id="@+id/downloading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/download_record_downloading"
-            android:layout_marginTop="7dp"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/text_color_black"
-            />
-
-        <ImageView
-            android:id="@+id/stop_download"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:src="@drawable/stop_download" />
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/light_gray"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/downloading"/>
-        <ImageView
-            android:id="@+id/downloading_file_icon"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginTop="25dp"
-            android:layout_below="@id/downloading"
-            tool:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/downloading_filename"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/downloading_file_icon"
-            android:layout_toEndOf="@id/downloading_file_icon"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="15dp"
-            android:layout_toStartOf="@+id/download_speed"
-            android:ellipsize="middle"
-            android:textSize="18sp"
-            android:maxEms="10"
-            android:singleLine="true"
-            android:textColor="@color/text_color_black"
-            tool:text="测试.zip" />
-
-        <TextView
-            android:id="@+id/download_speed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/download_progress"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp"
-            android:textColor="@color/text_color_black"
-            android:textSize="18sp"
-            tool:text="24.2ks/s" />
-        <ProgressBar
-            android:id="@+id/download_progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_toEndOf="@id/downloading_file_icon"
-            android:layout_below="@id/downloading_filename"
-            android:layout_marginTop="5dp"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
-            tool:progress="50" />
+            android:textSize="20sp" />
     </RelativeLayout>
     <ListView
         android:id="@+id/download_record_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/downloading_container"
+        android:layout_below="@id/download_record_bar_theme"
         android:layout_above="@+id/download_record_select_more_bar"
         android:divider="@null"/>
-    <ImageView
-        android:id="@+id/empty_download_record"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:src="@android:drawable/ic_menu_delete"
-        android:background="@drawable/delete_background"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="35dp"
-        android:layout_marginBottom="50dp"
-        tool:ignore="ContentDescription" />
+
     <RelativeLayout
-        android:id="@+id/download_record_select_more_bar"
-        android:visibility="gone"
+        android:id="@+id/download_record_storage_size_bar"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp">
+        <com.zbm.dainty.widget.TextProgressBar
+            android:id="@+id/storage_size_progress"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:max="100"
+            android:layout_toStartOf="@+id/empty_download_record"
+            android:layout_marginEnd="15dp"
+            android:layout_centerVertical="true"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:progressDrawable="@drawable/storage_size_progress_style"/>
+        <TextView
+            android:id="@+id/empty_download_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="@color/text_color_deep_gray"
+            android:text="@string/download_record_empty"
+            tool:ignore="ContentDescription" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/download_record_select_more_bar"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
         android:paddingStart="15dp"
         android:paddingEnd="15dp">
         <Button

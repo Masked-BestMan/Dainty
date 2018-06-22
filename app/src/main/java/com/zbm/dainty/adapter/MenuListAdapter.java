@@ -2,7 +2,6 @@ package com.zbm.dainty.adapter;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +50,7 @@ public class MenuListAdapter extends BaseAdapter {
         ViewHolder holder ;
         if(convertView==null){
             holder=new ViewHolder();
-            convertView=mInflater.inflate(R.layout.menu_drawer_list_item,null);
+            convertView=mInflater.inflate(R.layout.menu_drawer_list_item,parent,false);
             holder.menuImage=convertView.findViewById(R.id.menu_image);
             holder.menuTitle=convertView.findViewById(R.id.menu_title);
             convertView.setTag(holder);
@@ -70,7 +69,7 @@ public class MenuListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public final class ViewHolder{
+    private static class ViewHolder{
         ImageView menuImage;
         TextView menuTitle;
     }

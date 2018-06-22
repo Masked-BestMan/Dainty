@@ -2,6 +2,7 @@ package com.zbm.dainty.ui;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -34,13 +35,21 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
 
     @SuppressLint("ValidFragment")
     public WebViewFragment(Bundle savedInstanceState,OnWebViewListener onWebViewListener) {
-        bundle=savedInstanceState;
+        bundle=savedInstanceState;  //为空表示是用户手动添加标签页
         this.wl = onWebViewListener;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        webView.saveState(outState);
+        Log.d("WP","Fragment onSavedInstance");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d("WP","调用onCreateView cache :"+cache);
         if (cache == null) {
             cache = inflater.inflate(R.layout.webview_fragment, container, false);
             webView = cache.findViewById(R.id.web_view);   //TBS WebView必须在布局中创建，否则网页视频无法全屏
@@ -96,13 +105,15 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
                     if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
                         Toast.makeText(getActivity(), "请检查手机SD卡", Toast.LENGTH_SHORT).show();
                     } else {
-                        new ResolveDownloadUrlTask(getActivity(), cache).execute(s);
+                        new ResolveDownloadUrlTask(getActivity(), cache).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,s);
                     }
                 }
             });
             if (bundle!=null)
                 webView.restoreState(bundle);
-             else
+            else if (savedInstanceState!=null)
+                webView.restoreState(savedInstanceState);
+            else
                 webView.loadUrl("file:///android_asset/index.html");
 
             if (wl != null)
@@ -128,15 +139,12 @@ public class WebViewFragment extends android.support.v4.app.Fragment {
 
     @Override
     public void onDestroy() {
-        Log.d("Dainty","Fragment onDestroy");
-//        wl = null;
-        webView.stopLoading();
-        webView.removeAllViews();
-        webView.destroy();
-        webViewContainer.removeAllViews();
-//        webViewContainer=null;
-//        webView = null;
-//        cache = null;
+//        webView.stopLoading();
+//        webView.removeAllViews();
+//        webView.destroy();
+//        webViewContainer.removeAllViews();
+//        cache=null;
+        Log.d("WP","Fragment onDestroy");
         super.onDestroy();
     }
 

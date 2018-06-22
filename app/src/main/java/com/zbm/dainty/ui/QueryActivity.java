@@ -225,7 +225,9 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 selectedItem = i;
-                deleteWindow.showAsDropDown(view, 50, 50, Gravity.BOTTOM);
+                int[] positions = new int[2];
+                view.getLocationOnScreen(positions);
+                deleteWindow.showAtLocation(view, Gravity.TOP | Gravity.END, 50, positions[1] + MyUtil.dip2px(QueryActivity.this, 60));
                 return true;
             }
         });
@@ -255,7 +257,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         cleanHistoryButton.setOnClickListener(this);
-        deleteWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.WRAP_CONTENT,
+        deleteWindow = new PopupWindow(contentView, MyUtil.dip2px(this,120),
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         deleteWindow.setFocusable(true);
         deleteWindow.setOutsideTouchable(true);

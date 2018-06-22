@@ -32,10 +32,6 @@ public class HistoryListAdapter extends BaseExpandableListAdapter implements IDo
     private boolean canSelectMore;
     private boolean restoreCheckBox=false;
 
-    public boolean isRestoreCheckBox() {
-        return restoreCheckBox;
-    }
-
     public void setRestoreCheckBox(boolean restoreCheckBox) {
         this.restoreCheckBox = restoreCheckBox;
     }
@@ -151,7 +147,7 @@ public class HistoryListAdapter extends BaseExpandableListAdapter implements IDo
         if(canSelectMore){
             childHolder.deleteCheckBox.setVisibility(View.VISIBLE);
         }else {
-            childHolder.deleteCheckBox.setVisibility(View.INVISIBLE);
+            childHolder.deleteCheckBox.setVisibility(View.GONE);
         }
 
         if (restoreCheckBox)childHolder.deleteCheckBox.setChecked(false);
@@ -193,11 +189,11 @@ public class HistoryListAdapter extends BaseExpandableListAdapter implements IDo
         return IDockingController.DOCKING_HEADER_DOCKED;
     }
 
-    static class GroupHolder{
+    private static class GroupHolder{
         TextView date;
     }
 
-    static class ChildHolder{
+    private static class ChildHolder{
         TextView webTitle;
         TextView webUrl;
         CheckBox deleteCheckBox;

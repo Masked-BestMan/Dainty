@@ -11,6 +11,7 @@
     <string name="download_record_downloading">正在下载</string>
     <string name="download_record_delete">删除</string>
     <string name="download_record_cancel">取消</string>
+    <string name="download_record_empty">清空</string>
     <string name="label_fragment_title">书签</string>
     <string name="history_fragment_title">历史</string>
     <string name="query_title">点击搜索一下</string>

@@ -5,14 +5,12 @@ import android.util.Log;
 
 import com.tencent.smtt.sdk.QbSdk;
 
-import java.io.File;
 
 /**
  * Created by Zbm阿铭 on 2018/1/16.
  */
 
 public class DaintyApplication extends Application{
-    private File temporaryDownloadFile;
     @Override
     public void onCreate() {
         // TODO Auto-generated method stub
@@ -36,13 +34,5 @@ public class DaintyApplication extends Application{
         //x5内核初始化接口
         QbSdk.initX5Environment(getApplicationContext(),  cb);
 
-    }
-
-    public File getTemporaryDownloadFile() {
-        return temporaryDownloadFile;
-    }
-
-    public void setTemporaryDownloadFile(File temporaryDownloadFile) {
-        this.temporaryDownloadFile = temporaryDownloadFile;
     }
 }
