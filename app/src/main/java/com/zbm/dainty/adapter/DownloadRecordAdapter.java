@@ -2,6 +2,7 @@ package com.zbm.dainty.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,6 @@ import android.widget.TextView;
 
 import com.zbm.dainty.R;
 import com.zbm.dainty.bean.FileDownloadBean;
-import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
 
 import java.text.DateFormat;
@@ -81,7 +81,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (data.get(position).isDownloading())
+        if (!data.get(position).isFinished())
             return 0;
         else
             return 1;
@@ -98,6 +98,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
                 holder.name = convertView.findViewById(R.id.downloading_filename);
                 holder.speed = convertView.findViewById(R.id.download_speed);
                 holder.progressBar = convertView.findViewById(R.id.download_progress);
+                holder.downloadStatus=convertView.findViewById(R.id.download_status);
                 holder.checkBox = convertView.findViewById(R.id.download_record_delete_checkbox);
                 convertView.setTag(holder);
             }else {
@@ -116,7 +117,15 @@ public class DownloadRecordAdapter extends BaseAdapter {
             DownloadingHolder holder= (DownloadingHolder) convertView.getTag();
             holder.icon.setImageResource(R.mipmap.ic_launcher);
             holder.name.setText(data.get(position).getFileName());
-            holder.progressBar.setMax(DownloadHelper.downloadList.get(position).getFileSize());
+            holder.progressBar.setMax(data.get(position).getFileSize());
+            holder.progressBar.setProgress(data.get(position).getDownloadProgress());
+            if (data.get(position).isDownloading()) {
+                holder.speed.setText(data.get(position).getSpeed());
+                holder.downloadStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.stop_download));
+            }else {
+                holder.speed.setText("暂停");
+                holder.downloadStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.start_download));
+            }
             if(canSelectMore){
                 holder.checkBox.setVisibility(View.VISIBLE);
             }else {
@@ -134,7 +143,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
             ViewHolder holder= (ViewHolder) convertView.getTag();
             holder.icon.setImageResource(R.mipmap.ic_launcher);
             holder.name.setText(data.get(position).getFileName());
-            holder.describe.setText(format.format(new Date(data.get(position).getLastModified()))+"   "+data.get(position).getFileSize());
+            holder.describe.setText(format.format(new Date(data.get(position).getLastModified()))+"   "+ Formatter.formatFileSize(context,data.get(position).getFileSize()));
             if(canSelectMore){
                 holder.checkBox.setVisibility(View.VISIBLE);
             }else {
@@ -170,6 +179,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
         TextView name;
         TextView speed;
         ProgressBar progressBar;
+        ImageView downloadStatus;
         CheckBox checkBox;
     }
 }

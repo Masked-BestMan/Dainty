@@ -13,6 +13,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.zbm.dainty.bean.FileDownloadBean;
 import com.zbm.dainty.bean.HistoryItemBean;
 import com.zbm.dainty.bean.QueryItemBean;
 
@@ -33,6 +34,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
     public static final String TB_NAME = "historyTB";
     public static final String QTB_NAME = "queryTB";
     public static final String CTB_NAME = "collectionTB";
+    public static final String DTB_NAME="downloadTB";
     private static final String CREATE_HISTORYTB = "create table " + TB_NAME + "(" +
             "historyID integer primary key autoincrement," +
             "historyURL text," +
@@ -49,10 +51,19 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
             "collectionNAME text," +
             "collectionURL text unique," +
             "collectionTIME date)";
+    private static final String CREATE_DOWNLOADTB="create table "+DTB_NAME+"("+
+            "downloadID integer primary key autoincrement,"+
+            "downloadUrl text unique,"+
+            "downloadPATH text," +
+            "downloadNAME text,"+
+            "downloadSIZE integer,"+
+            "downloadLENGTH integer,"+
+            "downloadTIME bigint)";
 
     private OnSearchHistoryTableListener hl;
     private OnSearchQueryTableListener ql;
     private OnSearchCollectionTableListener cl;
+    private OnSearchDownloadTableListener dl;
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -67,6 +78,9 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                     break;
                 case 3:
                     ql.onResult((ArrayList<QueryItemBean>) msg.obj);
+                    break;
+                case 4:
+                    dl.onResult((ArrayList<FileDownloadBean>) msg.obj);
             }
         }
     };
@@ -84,6 +98,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_HISTORYTB);
         db.execSQL(CREATE_QUERYTB);
         db.execSQL(CREATE_COLLECTIONTB);
+        db.execSQL(CREATE_DOWNLOADTB);
     }
 
     @Override
@@ -306,6 +321,53 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         }).start();
     }
 
+    public void searchDownloadTable(final String sql, OnSearchDownloadTableListener dl){
+        this.dl=dl;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<FileDownloadBean> searchResult = new ArrayList<>();
+                SQLiteDatabase db = helper.getWritableDatabase();
+                Cursor mCursor = db.rawQuery(sql, null);
+                while (mCursor.moveToNext()) {
+                    String url=mCursor.getString(mCursor.getColumnIndex("downloadUrl"));
+                    String path = mCursor.getString(mCursor.getColumnIndex("downloadPATH"));
+                    String name = mCursor.getString(mCursor.getColumnIndex("downloadNAME"));
+                    int size=mCursor.getInt(mCursor.getColumnIndex("downloadSIZE"));
+                    int length = mCursor.getInt(mCursor.getColumnIndex("downloadLENGTH"));
+                    long time = mCursor.getLong(mCursor.getColumnIndex("downloadTIME"));
+                    FileDownloadBean fileDownloadBean=new FileDownloadBean(name);
+                    fileDownloadBean.setDownloadUrl(url);
+                    fileDownloadBean.setFilePath(path);
+                    fileDownloadBean.setFileSize(size);
+                    fileDownloadBean.setDownloadProgress(length);
+                    fileDownloadBean.setLastModified(time);
+                    fileDownloadBean.setDownloading(false);
+                    fileDownloadBean.setFinished(false);
+                    searchResult.add(fileDownloadBean);
+                }
+                mCursor.close();
+                mHandler.sendMessage(mHandler.obtainMessage(4, searchResult));
+            }
+        }).start();
+
+    }
+
+    public void updateDownloadTable(final String url, final String path, final String name, final int size, final int length, final long time){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SQLiteDatabase db = helper.getWritableDatabase();
+                String sql = "replace into " + DaintyDBHelper.DTB_NAME + "(downloadUrl,downloadPATH,downloadNAME,downloadSIZE,downloadLENGTH,downloadTIME) values('"+url+"','" + path + "','" + name + "'," + size + ","+length+","+time+")";
+                try {
+                    db.execSQL(sql);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     public void deleteTableItem(final String table, final String where) {
         new Thread(new Runnable() {
             @Override
@@ -329,5 +391,9 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
 
     public interface OnSearchCollectionTableListener {
         void onResult(ArrayList<Map<String, Object>> mCollectionData);
+    }
+
+    public interface OnSearchDownloadTableListener{
+        void onResult(ArrayList<FileDownloadBean> mDownloadData);
     }
 }

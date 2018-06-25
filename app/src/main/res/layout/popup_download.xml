@@ -21,7 +21,8 @@
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center"
         android:layout_marginStart="15dp"
         android:layout_below="@+id/textView2"
         android:layout_marginTop="15dp"
@@ -29,28 +30,41 @@
         android:textColor="@color/text_color_deep_gray"
         android:text="@string/popup_download_name" />
 
+    <Button
+        android:id="@+id/filename_edit"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/textView3"
+        android:layout_marginEnd="15dp"
+        android:background="@drawable/download_filename_edit" />
+
     <TextView
         android:id="@+id/filename"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView3"
-        android:layout_alignBottom="@+id/textView3"
-        android:layout_toEndOf="@+id/textView3"
-        android:singleLine="true"
+        android:layout_width="279dp"
+        android:layout_height="30dp"
+        android:layout_alignTop="@+id/textView3"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="-2dp"
+        android:layout_toEndOf="@+id/textView2"
+        android:layout_toStartOf="@id/filename_edit"
         android:ellipsize="middle"
+        android:gravity="center_vertical"
         android:maxEms="15"
-        android:textSize="15sp"
+        android:singleLine="true"
         android:textColor="@color/text_color_deep_gray"
+        android:textSize="15sp"
         tool:text="测试.zip" />
 
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_alignStart="@+id/textView3"
         android:layout_below="@+id/filename"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/popup_download_size"
+        android:gravity="center"
         android:textSize="15sp"
         android:textColor="@color/text_color_deep_gray"
         android:id="@+id/textView6" />
@@ -58,21 +72,21 @@
     <TextView
         android:id="@+id/file_size"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView6"
-        android:layout_alignBottom="@+id/textView6"
+        android:layout_height="30dp"
         android:layout_toEndOf="@+id/textView6"
+        android:layout_alignTop="@id/textView6"
         android:textSize="15sp"
+        android:gravity="center"
         android:textColor="@color/text_color_deep_gray"
         tool:text="20M" />
 
     <Button
         android:id="@+id/download_start"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="60dp"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/textView6"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="5dp"
         android:gravity="center"
         android:textSize="18sp"
         android:textColor="@color/colorPrimaryBlue"

@@ -214,7 +214,9 @@ public class MainActivity extends AppCompatActivity {
         List<Bundle> bundles=new ArrayList<>();
         for (WebViewFragment fragment:WebPage.webpagelist) {
             Bundle save=new Bundle();
-            fragment.getInnerWebView().saveState(save);
+            WebView webView=fragment.getInnerWebView();
+            if (webView!=null)
+                webView.saveState(save);
             bundles.add(save);
 
         }
@@ -739,12 +741,7 @@ public class MainActivity extends AppCompatActivity {
                                     MainActivity.super.onBackPressed();
                                 }
                             })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    }).show();
+                    .setNegativeButton("取消", null).show();
         } else {
             super.onBackPressed();
         }
