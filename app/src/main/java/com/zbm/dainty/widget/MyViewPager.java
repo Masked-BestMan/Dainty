@@ -13,7 +13,7 @@ import android.widget.FrameLayout;
 
 
 import com.zbm.dainty.bean.MessageEvent;
-import com.zbm.dainty.util.WebPage;
+import com.zbm.dainty.util.WebPageHelper;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -66,7 +66,7 @@ public class MyViewPager extends ViewPager implements OnGestureListener{
     public boolean onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()){
             case MotionEvent.ACTION_DOWN:
-                frameLayout=WebPage.webpagelist.get(getCurrentItem()).getInnerContainer();
+                frameLayout= WebPageHelper.webpagelist.get(getCurrentItem()).getInnerContainer();
                 measureWidth=frameLayout.getMeasuredWidth();
                 measureHeight=frameLayout.getMeasuredHeight();
 

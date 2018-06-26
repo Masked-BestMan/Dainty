@@ -56,7 +56,7 @@ import com.zbm.dainty.adapter.MenuListAdapter;
 import com.zbm.dainty.bean.MessageEvent;
 import com.zbm.dainty.R;
 import com.zbm.dainty.util.WeatherService;
-import com.zbm.dainty.util.WebPage;
+import com.zbm.dainty.util.WebPageHelper;
 import com.zbm.dainty.adapter.WebPageAdapter;
 import com.zbm.dainty.widget.MingWebView;
 import com.zbm.dainty.widget.MyViewPager;
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     private WebPageAdapter webpageAdapter;
     private MenuListAdapter menuAdapter;
     private long mExitTime;    //按下返回键退出时的时间
-    private boolean first = true;  //有两种含义：第一次运行app时或标签页最后一页被删后需要重新定位当前webview对象
+    private boolean first = true;  //有两种含义：第一次运行app时或标签页最后一页被删后需要重新定位当前WebView对象
     private boolean isZoom = false;  //是否缩放
     private SharedPreferences preferences;
     private int firstPosition=0;
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         List<Bundle> bundles=new ArrayList<>();
-        for (WebViewFragment fragment:WebPage.webpagelist) {
+        for (WebViewFragment fragment: WebPageHelper.webpagelist) {
             Bundle save=new Bundle();
             WebView webView=fragment.getInnerWebView();
             if (webView!=null)
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
             bundles.add(save);
 
         }
-        outState.putInt("web_page_count",WebPage.webpagelist.size());
+        outState.putInt("web_page_count", WebPageHelper.webpagelist.size());
         outState.putParcelableArrayList("web_page_bundle", (ArrayList<? extends Parcelable>) bundles);
     }
 
@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        WebPage.webpagelist.clear();
+        WebPageHelper.webpagelist.clear();
         unregisterReceiver(networkChange);
         unregisterReceiver(refresh);
     }
@@ -289,16 +289,16 @@ public class MainActivity extends AppCompatActivity {
             int count = savedInstanceState.getInt("web_page_count");
             for (int i=0;i<count;i++) {
                 WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null,initWebView());
-                WebPage.webpagelist.add(fragment);
+                WebPageHelper.webpagelist.add(fragment);
             }
             initDot(count);
         }else {
             WebViewFragment fragment = new WebViewFragment( null,initWebView());
-            WebPage.webpagelist.add(fragment);
+            WebPageHelper.webpagelist.add(fragment);
             initDot(1);
         }
         webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
-        mViewPager.setOffscreenPageLimit(7);
+        mViewPager.setOffscreenPageLimit(5);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -338,8 +338,8 @@ public class MainActivity extends AppCompatActivity {
             indicator.addView(view, layoutParams);
         }
         Log.d("WP","当前页："+mViewPager.getCurrentItem());
-        indicator.getChildAt(count-1).setEnabled(true);
-        firstPosition=count-1;
+        indicator.getChildAt(mViewPager.getCurrentItem()).setEnabled(true);
+        firstPosition=mViewPager.getCurrentItem();
     }
 
     @OnItemClick(R.id.menu_list)
@@ -411,14 +411,14 @@ public class MainActivity extends AppCompatActivity {
                 ZoomChange(0);
                 break;
             case R.id.add_web_page:
-                if (WebPage.webpagelist.size() >= 8) {
+                if (WebPageHelper.webpagelist.size() >= WebPageHelper.WEB_PAGE_LIMIT_NUM) {
                     Toast.makeText(this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
                 } else {
                     WebViewFragment fragment = new WebViewFragment(null,initWebView());
-                    WebPage.webpagelist.add(fragment);
+                    WebPageHelper.webpagelist.add(fragment);
                     webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
-                    initDot(WebPage.webpagelist.size());
-                    fixWebPage(WebPage.webpagelist.size() - 1);
+                    initDot(WebPageHelper.webpagelist.size());
+                    fixWebPage(WebPageHelper.webpagelist.size() - 1);
                     ZoomChange(1);
                 }
                 break;
@@ -458,9 +458,11 @@ public class MainActivity extends AppCompatActivity {
             indicator.setVisibility(View.VISIBLE);
 
         } else {
+            //防止viewpager滑动错位
+            fixWebPage(mViewPager.getCurrentItem());
 
-            webView = WebPage.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView(); //定位当前的webview对象
-            //webView.setLayerType(View.LAYER_TYPE_NONE,null);
+            webView = WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView(); //定位当前的WebView对象
+
             isZoom = false;
             webView.onResume();
 
@@ -475,8 +477,7 @@ public class MainActivity extends AppCompatActivity {
             indicator.setVisibility(View.INVISIBLE);
 
 
-            //防止viewpager滑动错位
-            fixWebPage(mViewPager.getCurrentItem());
+
 
             //检测当前的webview对象是否可以向前或前后浏览
             if (!webView.canGoBack()) {
@@ -490,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
                 nextButton.setEnabled(true);
             }
 
-
+            //webView.setLayerType(View.LAYER_TYPE_NONE,null);
         }
     }
 
@@ -583,7 +584,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             value = -2500;
         }
-        View selectedView = WebPage.webpagelist.get(mViewPager.getCurrentItem()).getInnerContainer();
+        View selectedView = WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerContainer();
         Animation animation = new TranslateAnimation(0, 0, viewTop, value);
         animation.setDuration(400);
         animation.setAnimationListener(new Animation.AnimationListener() {
@@ -594,17 +595,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                WebPage.webpagelist.remove(mViewPager.getCurrentItem());
+                WebPageHelper.webpagelist.remove(mViewPager.getCurrentItem());
                 webpageAdapter.setDeleteItem(mViewPager.getCurrentItem());
                 webpageAdapter.notifyDataSetChanged(WebPageAdapter.DELETE_PAGE);
-                if (WebPage.webpagelist.size() == 0) {
+                if (WebPageHelper.webpagelist.size() == 0) {
                     first = true;
                     WebViewFragment fragment = new WebViewFragment(null,initWebView());
-                    WebPage.webpagelist.add(fragment);
+                    WebPageHelper.webpagelist.add(fragment);
                     webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
                     ZoomChange(1);
                 }
-                initDot(WebPage.webpagelist.size());
+                initDot(WebPageHelper.webpagelist.size());
             }
 
             @Override

@@ -89,7 +89,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    public DaintyDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    private DaintyDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
@@ -111,6 +111,10 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         if (helper == null)
             helper = new DaintyDBHelper(context.getApplicationContext(), "DaintyDatabase", null, 1);
         return helper;
+    }
+
+    private synchronized SQLiteDatabase getDatabase(){
+        return helper.getWritableDatabase();
     }
 
     public void searchHistoryTable(OnSearchHistoryTableListener hl) {
@@ -327,7 +331,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
             @Override
             public void run() {
                 ArrayList<FileDownloadBean> searchResult = new ArrayList<>();
-                SQLiteDatabase db = helper.getWritableDatabase();
+                SQLiteDatabase db = getDatabase();
                 Cursor mCursor = db.rawQuery(sql, null);
                 while (mCursor.moveToNext()) {
                     String url=mCursor.getString(mCursor.getColumnIndex("downloadUrl"));
@@ -357,7 +361,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                SQLiteDatabase db = helper.getWritableDatabase();
+                SQLiteDatabase db = getDatabase();
                 String sql = "replace into " + DaintyDBHelper.DTB_NAME + "(downloadUrl,downloadPATH,downloadNAME,downloadSIZE,downloadLENGTH,downloadTIME) values('"+url+"','" + path + "','" + name + "'," + size + ","+length+","+time+")";
                 try {
                     db.execSQL(sql);
@@ -372,7 +376,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                SQLiteDatabase db = helper.getWritableDatabase();
+                SQLiteDatabase db = getDatabase();
                 if (where != null)
                     db.execSQL("delete from " + table + " " + where);
                 else

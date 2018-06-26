@@ -3,7 +3,6 @@ package com.zbm.dainty.task;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -115,21 +114,12 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
         super.onCancelled();
         if (isPause) {
             downloadLength = progress;
-            Log.d("Dainty", "更新进度:  " + progress);
-
-//            FileDownloadBean fileDownloadBean=new FileDownloadBean(fileName);
-//            fileDownloadBean.setDownloadUrl(downloadUrl);
-//            fileDownloadBean.setFilePath(filePath.getAbsolutePath());
-//            fileDownloadBean.setFileName(fileName);
-//            fileDownloadBean.setFileSize(fileSize);
-//            fileDownloadBean.setDownloading(false);
-//            fileDownloadBean.setFinished(false);
-//            fileDownloadBean.setLastModified(time);
-//            fileDownloadBean.setDownloadProgress(downloadLength);
-            DaintyDBHelper.getDaintyDBHelper(context).updateDownloadTable(downloadUrl, filePath.getAbsolutePath(), fileName, fileSize, progress, time);
+            Log.d("download", "onCancelled更新进度:  " + progress);
+            DaintyDBHelper.getDaintyDBHelper(context).updateDownloadTable(downloadUrl,
+                    filePath.getAbsolutePath(), fileName, fileSize, progress, time);
         } else {
-            Log.d("Dainty", "取消下载:  " + fileName);
-            Toast.makeText(context, "任务取消", Toast.LENGTH_SHORT).show();
+            Log.d("download", "取消下载:  " + fileName);
+            Toast.makeText(context, "下载取消", Toast.LENGTH_SHORT).show();
         }
         DownloadHelper.downloadList.remove(this);
     }
@@ -138,9 +128,12 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
     protected void onPreExecute() {
         // TODO Auto-generated method stub
         super.onPreExecute();
-        SQLiteDatabase db = DaintyDBHelper.getDaintyDBHelper(context).getWritableDatabase();
-        db.execSQL("delete from " + DaintyDBHelper.DTB_NAME + " where downloadUrl='" + downloadUrl + "'");
-        ClickableToast.makeClickText(context, "开始下载", "查看", Toast.LENGTH_SHORT, new ClickableToast.OnToastClickListener() {
+        DaintyDBHelper.getDaintyDBHelper(context).deleteTableItem(DaintyDBHelper.DTB_NAME,
+                "where downloadUrl='" + downloadUrl + "'");
+//        SQLiteDatabase db = DaintyDBHelper.getDaintyDBHelper(context).getWritableDatabase();
+//        db.execSQL("delete from " + DaintyDBHelper.DTB_NAME + " where downloadUrl='" + downloadUrl + "'");
+        ClickableToast.makeClickText(context, "开始下载", "查看", Toast.LENGTH_SHORT,
+                new ClickableToast.OnToastClickListener() {
             @Override
             public void onToastClick() {
                 context.startActivity(new Intent(context, DownloadRecordActivity.class));
@@ -165,19 +158,14 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
             case "success":
                 DaintyDBHelper.getDaintyDBHelper(context).deleteTableItem(DaintyDBHelper.DTB_NAME,
                         "where downloadUrl='" + downloadUrl + "'");
-                //DownloadHelper.downloadList.remove(this);
                 break;
             case "file_error":
                 DaintyDBHelper.getDaintyDBHelper(context).updateDownloadTable(downloadUrl, filePath.getAbsolutePath(), fileName, fileSize, progress, time);
                 Toast.makeText(context, "文件被篡改,请重新下载！", Toast.LENGTH_SHORT).show();
-//                Intent intent = new Intent();
-//                intent.setAction("download_progress_refresh");
-//                intent.putExtra("finish_download",true);
-//                context.sendBroadcast(intent);
                 break;
             case "fail":
                 if (progress==0)progress=downloadLength;
-                Log.d("download","更新下载进度："+progress+"  downloadLength:"+downloadLength);
+                Log.d("download","下载失败更新进度："+progress+"  downloadLength:"+downloadLength);
                 DaintyDBHelper.getDaintyDBHelper(context).updateDownloadTable(downloadUrl, filePath.getAbsolutePath(), fileName, fileSize, progress, time);
                 Toast.makeText(context, "下载错误,请重试！", Toast.LENGTH_SHORT).show();
                 break;
@@ -188,6 +176,7 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
         intent.putExtra("finish_download", true);
         context.sendBroadcast(intent);
         DownloadHelper.downloadList.remove(this);
+
         //解压
         //new ZipExtractorTask(context, result.getAbsolutePath(), directory.getAbsolutePath() + "/" + fileNameWithoutPostFix, false).execute();
     }

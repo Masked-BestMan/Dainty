@@ -1,12 +1,8 @@
 package com.zbm.dainty.adapter;
 
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
-import android.view.ViewGroup;
 
-import com.zbm.dainty.util.WebPage;
+import com.zbm.dainty.util.WebPageHelper;
 import com.zbm.dainty.ui.WebViewFragment;
 
 /**
@@ -25,12 +21,12 @@ public class WebPageAdapter extends UpdatableFragmentPagerAdapter {
 
     @Override
     public WebViewFragment getItem(int position) {
-        return WebPage.webpagelist.get(position);
+        return WebPageHelper.webpagelist.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return WebPage.webpagelist.get(position).hashCode();
+        return WebPageHelper.webpagelist.get(position).hashCode();
     }
 
     @Override
@@ -40,7 +36,7 @@ public class WebPageAdapter extends UpdatableFragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return WebPage.webpagelist.size();
+        return WebPageHelper.webpagelist.size();
     }
 //    @Override
 //    public Object instantiateItem(ViewGroup container, int position) {
