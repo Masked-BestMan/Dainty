@@ -1,5 +1,6 @@
 package com.zbm.dainty.widget;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -22,7 +23,6 @@ public class SwipeBackLayout extends FrameLayout {
     private Drawable mShadowLeft;
     private static final int FULL_ALPHA = 255;
     private static final int DEFAULT_SCRIM_COLOR = 0x99000000;
-    private int mScrimColor = DEFAULT_SCRIM_COLOR;
     private float mScrimOpacity;
     private float mScrollPercent;
     private Rect mTmpRect = new Rect();
@@ -84,6 +84,7 @@ public class SwipeBackLayout extends FrameLayout {
         return mHelper.shouldInterceptTouchEvent(ev);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Touch Event 代理
@@ -136,6 +137,7 @@ public class SwipeBackLayout extends FrameLayout {
     }
 
     private void drawScrim(Canvas canvas, View child) {
+        int mScrimColor = DEFAULT_SCRIM_COLOR;
         final int baseAlpha = (mScrimColor & 0xff000000) >>> 24;
         final int alpha = (int) (baseAlpha * mScrimOpacity);
         final int color = alpha << 24 | (mScrimColor & 0xffffff);

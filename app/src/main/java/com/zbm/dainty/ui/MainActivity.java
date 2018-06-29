@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -48,6 +47,7 @@ import android.widget.Toast;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.zbm.dainty.task.DownloaderTask;
+import com.zbm.dainty.task.ImageTask;
 import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.CircleImageView;
@@ -67,7 +67,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,8 +109,6 @@ public class MainActivity extends AppCompatActivity {
     TextView now_temperature;
     @BindView(R.id.current_city)
     TextView city;
-    @BindView(R.id.weather_info)
-    TextView describe;
 
     @BindView(R.id.anchor)
     View anchor;
@@ -140,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isZoom = false;  //是否缩放
     private SharedPreferences preferences;
     private int firstPosition=0;
+    private int selectMenuPosition=-2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -191,7 +190,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         now_temperature.setText(preferences.getString("wendu", "N/A"));
-        describe.setText(preferences.getString("ganmao", "无天气信息"));
         city.setText(preferences.getString("cityName", "未知城市"));
         if (webView != null) {
             webView.getSettings().setTextZoom(Integer.valueOf(preferences.getString("text_size", "100")));
@@ -260,13 +258,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView(Bundle savedInstanceState) {
+        if (savedInstanceState!=null) {
+            List<Bundle> bundles=savedInstanceState.getParcelableArrayList("web_page_bundle");
+            int count = savedInstanceState.getInt("web_page_count");
+            for (int i=0;i<count;i++) {
+                WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null,initWebView());
+                WebPageHelper.webpagelist.add(fragment);
+            }
+            initDot(count);
+        }else {
+            WebViewFragment fragment = new WebViewFragment( null,initWebView());
+            WebPageHelper.webpagelist.add(fragment);
+            initDot(1);
+        }
+
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         menuAdapter = new MenuListAdapter(this);
         listView.setAdapter(menuAdapter);
-
-        now_temperature.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/FZYTK.TTF"));
-        describe.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/FZYTK.TTF"));
-
 
         mViewPager.setOnLayoutClickListener(new MyViewPager.OnLayoutClickListener() {
             @Override
@@ -281,23 +289,11 @@ public class MainActivity extends AppCompatActivity {
                 return mViewPager.dispatchTouchEvent(event);
             }
         });
-        mViewPager.setPageMargin(MyUtil.dip2px(this,50));
+        mViewPager.setPageMargin(MyUtil.dip2px(this,45));
         webpageAdapter = new WebPageAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(webpageAdapter);
-        if (savedInstanceState!=null) {
-            List<Bundle> bundles=savedInstanceState.getParcelableArrayList("web_page_bundle");
-            int count = savedInstanceState.getInt("web_page_count");
-            for (int i=0;i<count;i++) {
-                WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null,initWebView());
-                WebPageHelper.webpagelist.add(fragment);
-            }
-            initDot(count);
-        }else {
-            WebViewFragment fragment = new WebViewFragment( null,initWebView());
-            WebPageHelper.webpagelist.add(fragment);
-            initDot(1);
-        }
-        webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
+
+        //webpageAdapter.notifyDataSetChanged();
         mViewPager.setOffscreenPageLimit(5);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -317,7 +313,67 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        indicator.getChildAt(0).setEnabled(true);
+
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                switch (selectMenuPosition) {
+                    case -1:
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        overridePendingTransition(R.anim.left_in, 0);
+                        break;
+                    case 0:
+                        webView.loadUrl("http://dushu.m.baidu.com");
+                        break;
+                    case 1:
+                        webView.loadUrl("https://m.bilibili.com");
+                        break;
+                    case 2:
+                        webView.loadUrl("http://m.xinhuanet.com");
+                        break;
+                    case 3:
+                        //如果不是新的请求，getFavicon只能返回旧图，待修复
+                        Intent intent = new Intent(MainActivity.this, CollectionEditActivity.class);
+                        Bitmap icon = webView.getFavicon();
+                        if (icon == null)
+                            icon = BitmapFactory.decodeResource(getResources(), R.drawable.collection_icon_default);
+                        intent.putExtra("icon", icon);
+                        intent.putExtra("title", webView.getTitle());
+                        intent.putExtra("url", webView.getUrl());
+                        startActivity(intent);
+                        overridePendingTransition(R.anim.left_in, 0);
+                        break;
+                    case 4:
+                        startActivityForResult(new Intent(MainActivity.this, DownloadRecordActivity.class), 1);
+                        overridePendingTransition(R.anim.left_in, 0);
+                        break;
+                    case 5:
+                        startActivityForResult(new Intent(MainActivity.this, HistoryAndLabelActivity.class), 1);
+                        overridePendingTransition(R.anim.left_in, 0);
+                        break;
+                    case 6:
+                        startActivity(new Intent(MainActivity.this, ConfigActivity.class));
+                        overridePendingTransition(R.anim.left_in, 0);
+                        break;
+                }
+                selectMenuPosition=-2;
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
     }
 
     private void initDot(int count){
@@ -345,41 +401,7 @@ public class MainActivity extends AppCompatActivity {
     @OnItemClick(R.id.menu_list)
     public void onItemClick(int position) {
         mDrawerLayout.closeDrawer(Gravity.START);
-        switch (position) {
-            case 0:
-                webView.loadUrl("http://dushu.m.baidu.com");
-                break;
-            case 1:
-                webView.loadUrl("https://m.bilibili.com");
-                break;
-            case 2:
-                webView.loadUrl("http://m.xinhuanet.com");
-                break;
-            case 3:
-                //如果不是新的请求，getFavicon只能返回旧图，待修复
-                Intent intent = new Intent(MainActivity.this, CollectionEditActivity.class);
-                Bitmap icon = webView.getFavicon();
-                if (icon == null)
-                    icon = BitmapFactory.decodeResource(getResources(), R.drawable.collection_icon_default);
-                intent.putExtra("icon", icon);
-                intent.putExtra("title", webView.getTitle());
-                intent.putExtra("url", webView.getUrl());
-                startActivity(intent);
-                overridePendingTransition(R.anim.left_in, 0);
-                break;
-            case 4:
-                startActivityForResult(new Intent(MainActivity.this, DownloadRecordActivity.class), 1);
-                overridePendingTransition(R.anim.left_in, 0);
-                break;
-            case 5:
-                startActivityForResult(new Intent(MainActivity.this, HistoryAndLabelActivity.class), 1);
-                overridePendingTransition(R.anim.left_in, 0);
-                break;
-            case 6:
-                startActivity(new Intent(MainActivity.this, ConfigActivity.class));
-                overridePendingTransition(R.anim.left_in, 0);
-                break;
-        }
+        selectMenuPosition=position;
     }
 
     @OnClick({R.id.menu_button, R.id.query_button, R.id.web_back, R.id.web_next,
@@ -415,11 +437,12 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
                 } else {
                     WebViewFragment fragment = new WebViewFragment(null,initWebView());
-                    WebPageHelper.webpagelist.add(fragment);
-                    webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
+                    WebPageHelper.webpagelist.add(mViewPager.getCurrentItem()+1,fragment);
+                    webpageAdapter.notifyDataSetChanged();
                     initDot(WebPageHelper.webpagelist.size());
-                    fixWebPage(WebPageHelper.webpagelist.size() - 1);
+                    fixWebPage(mViewPager.getCurrentItem()+1);
                     ZoomChange(1);
+
                 }
                 break;
             case R.id.home_button:
@@ -429,8 +452,7 @@ public class MainActivity extends AppCompatActivity {
                 checkDownloadTask();
                 break;
             case R.id.head_portrait:
-                startActivity(new Intent(this, LoginActivity.class));
-                overridePendingTransition(R.anim.left_in, 0);
+                selectMenuPosition=-1;
                 break;
             default:
                 Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
@@ -440,9 +462,11 @@ public class MainActivity extends AppCompatActivity {
     private void ZoomChange(int flag) {
         //0为缩小，1为放大
         if (flag == 0) {
-            //webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
             isZoom = true;
-            webView.onPause();
+            for (WebViewFragment webViewFragment:WebPageHelper.webpagelist) {
+                webViewFragment.getInnerWebView().onPause();
+                webViewFragment.getInnerWebView().pauseTimers();
+            }
 
             mViewPager.setFullScreen(false);
 
@@ -464,8 +488,16 @@ public class MainActivity extends AppCompatActivity {
             webView = WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView(); //定位当前的WebView对象
 
             isZoom = false;
-            webView.onResume();
 
+            for (WebViewFragment webViewFragment:WebPageHelper.webpagelist) {
+                if (WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).equals(webViewFragment)) {
+                    webView.onResume();     //由于调用onResume会导致所有WebView都处于活动状态，而onPause只是针对单个
+                    webView.resumeTimers();
+                }else {
+                    webViewFragment.getInnerWebView().onPause();
+                    webViewFragment.getInnerWebView().pauseTimers();
+                }
+            }
             mViewPager.setFullScreen(true);
 
             mViewPager.clearAnimation();
@@ -491,7 +523,6 @@ public class MainActivity extends AppCompatActivity {
                 nextButton.setEnabled(true);
             }
 
-            //webView.setLayerType(View.LAYER_TYPE_NONE,null);
         }
     }
 
@@ -571,6 +602,40 @@ public class MainActivity extends AppCompatActivity {
                     progressBar.setProgress(i);
                 }
             }
+
+            @Override
+            public void onQuickActionClick(WebView webView, int itemId, String extra) {
+                switch (itemId){
+                    case WebViewFragment.LOAD_IN_NEW_WINDOW:
+                        if (WebPageHelper.webpagelist.size()>=WebPageHelper.WEB_PAGE_LIMIT_NUM) {
+                            Toast.makeText(MainActivity.this,"窗口数量超过最大值",Toast.LENGTH_SHORT).show();
+                        }else {
+                            WebViewFragment fragment = new WebViewFragment(null, initWebView(), extra);
+                            WebPageHelper.webpagelist.add(mViewPager.getCurrentItem() + 1, fragment);
+                            webpageAdapter.notifyDataSetChanged();
+                            initDot(WebPageHelper.webpagelist.size());
+                            mViewPager.setCurrentItem(mViewPager.getCurrentItem()+1,true);
+                        }
+                        break;
+                    case WebViewFragment.LOAD_IN_BACKGROUND:
+                        if (WebPageHelper.webpagelist.size()>=WebPageHelper.WEB_PAGE_LIMIT_NUM) {
+                            Toast.makeText(MainActivity.this,"窗口数量超过最大值",Toast.LENGTH_SHORT).show();
+                        }else {
+                            WebViewFragment fragment = new WebViewFragment(null, initWebView(), extra);
+                            WebPageHelper.webpagelist.add(mViewPager.getCurrentItem() + 1, fragment);
+                            webpageAdapter.notifyDataSetChanged();
+                            initDot(WebPageHelper.webpagelist.size());
+                        }
+                        break;
+                    case WebViewFragment.FREE_REPLICATION:
+                        break;
+                    case WebViewFragment.COPY_LINK:
+                        break;
+                    case WebViewFragment.DOWNLOAD_IMAGE:
+                        new ImageTask(MainActivity.this).execute(extra);
+                        break;
+                }
+            }
         };
     }
 
@@ -595,14 +660,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerContainer().removeAllViews();
+                WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView().destroy();
                 WebPageHelper.webpagelist.remove(mViewPager.getCurrentItem());
-                webpageAdapter.setDeleteItem(mViewPager.getCurrentItem());
-                webpageAdapter.notifyDataSetChanged(WebPageAdapter.DELETE_PAGE);
+                webpageAdapter.notifyDataSetChanged();
                 if (WebPageHelper.webpagelist.size() == 0) {
                     first = true;
                     WebViewFragment fragment = new WebViewFragment(null,initWebView());
                     WebPageHelper.webpagelist.add(fragment);
-                    webpageAdapter.notifyDataSetChanged(WebPageAdapter.ADD_PAGE);
+                    webpageAdapter.notifyDataSetChanged();
                     ZoomChange(1);
                 }
                 initDot(WebPageHelper.webpagelist.size());
@@ -618,15 +684,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fixWebPage(int position) {
-        try {
-            Field field = mViewPager.getClass().getDeclaredField("mCurItem");
-            field.setAccessible(true);
-            field.setInt(mViewPager, position);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         webpageAdapter.notifyDataSetChanged();
-        mViewPager.setCurrentItem(position);
+        mViewPager.setCurrentItem(position,true);
     }
 
     public void onBackPressed() {
@@ -695,7 +754,6 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             now_temperature.setText(preferences.getString("wendu", ""));
-            describe.setText(preferences.getString("ganmao", "无天气信息"));
             city.setText(preferences.getString("cityName", " "));
         }
     };
@@ -747,4 +805,5 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
+
 }

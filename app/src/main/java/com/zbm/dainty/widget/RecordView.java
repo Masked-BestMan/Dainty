@@ -1,5 +1,6 @@
 package com.zbm.dainty.widget;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -19,28 +20,15 @@ import java.util.ArrayList;
 public class RecordView extends View {
     //View默认最小宽度
     private static final int DEFAULT_MIN_WIDTH = 500;
-    private Context mContext;
     private Paint mPaint;
-    private final String TAG = "RecordView";
     private long lastTime = 0;
-    private int lineSpeed = 100;
     private float translateX = 0;
-    /**
-     * 灵敏度
-     */
-    private int sensibility = 4;
 
-    /**
-     * 振幅
-     */
-    private float amplitude = 1;
     /**
      * 音量
      */
     private float volume = 10;
-    private int fineness = 1;
     private float targetVolume = 1;
-    private float maxVolume = 100;
     private boolean isSet = false;
     private boolean canSetVolume = true;
     private TypedArray typedArray;
@@ -52,28 +40,27 @@ public class RecordView extends View {
         this(context,null);
     }
 
+    @SuppressLint("CustomViewStyleable")
     public RecordView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.mContext = context;
         typedArray = context.obtainStyledAttributes(attrs, R.styleable.recordView);
-        initAtts();
+        initAttrs();
         mPaint = new Paint();
         mPaint.setAntiAlias(true);//消除锯齿
         mPaint.setStyle(Paint.Style.STROKE);
     }
 
-    private void initAtts(){
+    private void initAttrs(){
         voiceLineColor = typedArray.getColor(R.styleable.recordView_middleLineColor, getResources().getColor(R.color.RoundFillColor));
         paths = new ArrayList<>(20);
         for (int i = 0; i <20; i++) {
             paths.add(new Path());
         }
     }
+
     /**
      * 当布局为wrap_content时设置默认长宽
      *
-     * @param widthMeasureSpec
-     * @param heightMeasureSpec
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -112,12 +99,13 @@ public class RecordView extends View {
             paths.get(i).reset();
             paths.get(i).moveTo(getWidth(), getHeight() *3/4);
         }
-        for (float j = getWidth() ; j >= 0; j -= fineness) {
-            float i = j;
+        int fineness = 1;
+        for (float j = getWidth(); j >= 0; j -= fineness) {
             //这边必须保证起始点和终点的时候amplitude = 0;
-            amplitude = 5 * volume *i / getWidth() - 5 * volume * i / getWidth() * i/getWidth();
+
+            float amplitude = 5 * volume * j / getWidth() - 5 * volume * j / getWidth() * j / getWidth();  //振幅
             for (int n = 1; n <= paths.size(); n++) {
-                float sin = amplitude * (float) Math.sin((i - Math.pow(1.22, n)) * Math.PI / 180 - translateX);
+                float sin = amplitude * (float) Math.sin((j - Math.pow(1.22, n)) * Math.PI / 180 - translateX);
                 paths.get(n - 1).lineTo(j, (2 * n * sin / paths.size() - 15 * sin / paths.size() + moveY));
             }
         }
@@ -140,6 +128,7 @@ public class RecordView extends View {
             lastTime = System.currentTimeMillis();
             translateX += 5;
         } else {
+            int lineSpeed = 100;
             if (System.currentTimeMillis() - lastTime > lineSpeed) {
                 lastTime = System.currentTimeMillis();
                 translateX += 5;
@@ -168,6 +157,9 @@ public class RecordView extends View {
         volume = volume*2/5;
         if(!canSetVolume)
             return;
+
+        int sensibility = 4; //灵敏度
+        float maxVolume = 100;
         if (volume > maxVolume * sensibility / 30) {
             isSet = true;
             this.targetVolume = getHeight() * volume / 3 / maxVolume;
@@ -175,6 +167,7 @@ public class RecordView extends View {
         postInvalidate();
     }
 
+    @SuppressWarnings("unused")
     public void cancel(){
         canSetVolume = false;
         targetVolume = 1;

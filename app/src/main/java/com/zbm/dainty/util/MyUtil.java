@@ -8,18 +8,22 @@ import android.util.DisplayMetrics;
 
 public class MyUtil {
 
-    public static int dip2px(Context context,float dpValue){
-        final float scale=context.getResources().getDisplayMetrics().density;
-        return (int)(dpValue*scale+0.5f);
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
-    public  static int px2dip(Context context,float pxValue){
-        final float scale=context.getResources().getDisplayMetrics().density;
-        return (int)(pxValue/scale+0.5f);
+
+
+    @SuppressWarnings("unused")
+    public static int px2dip(Context context, float pxValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (pxValue / scale + 0.5f);
     }
 
     /**
      * 判断软键盘是否弹出
-     * @return
+     *
+     * @return *
      */
     public static boolean isSoftInputMethodShowing(Activity context) {
 
@@ -31,7 +35,7 @@ public class MyUtil {
         Rect rect = new Rect();
         context.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
 
-        return usableHeight - rect.bottom  != 0;
+        return usableHeight - rect.bottom != 0;
     }
 
     public static int getNavigationBarHeight(Activity context) {
@@ -40,6 +44,7 @@ public class MyUtil {
         int realHeight = metrics.heightPixels;
         context.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int usableHeight = metrics.heightPixels;
-        return realHeight-usableHeight;
+        return realHeight - usableHeight;
     }
+
 }

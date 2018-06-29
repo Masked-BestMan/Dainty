@@ -1,5 +1,6 @@
 package com.zbm.dainty.widget;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -160,6 +161,7 @@ public class HistoryListView extends ExpandableListView implements AbsListView.O
     // Note: As header view is drawn to the canvas instead of adding into view hierarchy,
     // it's useless to set its touch or click event listener. Need to handle these input
     // events carefully by ourselves.
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (mDockingHeaderVisible) {

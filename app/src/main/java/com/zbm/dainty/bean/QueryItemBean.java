@@ -15,35 +15,25 @@ public class QueryItemBean {
         this.queryNAME=queryNAME;
     }
 
+    @SuppressWarnings("unused")
     public int getQueryID() {
         return queryID;
     }
 
-    public void setQueryID(int queryID) {
-        this.queryID = queryID;
-    }
 
     public String getQueryTYPE() {
         return queryTYPE;
     }
 
-    public void setQueryTYPE(String queryTYPE) {
-        this.queryTYPE = queryTYPE;
-    }
 
+    @SuppressWarnings("unused")
     public String getQueryTIME() {
         return queryTIME;
     }
 
-    public void setQueryTIME(String queryTIME) {
-        this.queryTIME = queryTIME;
-    }
 
     public String getQueryNAME() {
         return queryNAME;
     }
 
-    public void setQueryNAME(String queryNAME) {
-        this.queryNAME = queryNAME;
-    }
 }

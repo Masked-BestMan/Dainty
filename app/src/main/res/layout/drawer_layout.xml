@@ -17,24 +17,11 @@
             android:id="@+id/head_portrait"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="24dp"
+            android:layout_centerInParent="true"
             android:clickable="true"
             android:focusable="true"
             android:scaleType="fitXY"
             android:src="@drawable/default_head_portrait"/>
-
-        <TextView
-            android:id="@+id/weather_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/head_portrait"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="13dp"
-            android:textColor="#000"
-            android:textSize="12sp"
-            tool:text="天气转凉，小心感冒" />
     </RelativeLayout>
 
 

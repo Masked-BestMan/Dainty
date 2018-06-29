@@ -10,13 +10,13 @@ import com.zbm.dainty.ui.WebViewFragment;
  */
 
 public class WebPageAdapter extends UpdatableFragmentPagerAdapter {
-    private FragmentManager fm;
-    public static final int ADD_PAGE=0;
-    public static final int DELETE_PAGE=1;
-    private int deleteItem=-1,notifyType=1;
+    //private FragmentManager fm;
+    //public static final int ADD_PAGE=0;
+    //public static final int DELETE_PAGE=1;
+    //private int deleteItem=-1,notifyType=1;
     public WebPageAdapter(FragmentManager fm) {
         super(fm);
-        this.fm=fm;
+        //this.fm=fm;
     }
 
     @Override
@@ -53,17 +53,17 @@ public class WebPageAdapter extends UpdatableFragmentPagerAdapter {
 //        super.destroyItem(container, position, object);
 //    }
 
-    public int getDeleteItem() {
-        return deleteItem;
-    }
+//    public int getDeleteItem() {
+//        return deleteItem;
+//    }
 
-    public void setDeleteItem(int deleteItem) {
-        this.deleteItem = deleteItem;
-    }
+//    public void setDeleteItem(int deleteItem) {
+//        this.deleteItem = deleteItem;
+//    }
 
-    public void notifyDataSetChanged(int type) {
-        notifyType=type;
-        super.notifyDataSetChanged();
-    }
+//    public void notifyDataSetChanged(int type) {
+//        notifyType=type;
+//        super.notifyDataSetChanged();
+//    }
 
 }

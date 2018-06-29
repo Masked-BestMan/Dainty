@@ -1,5 +1,6 @@
 package com.zbm.dainty.ui;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -31,7 +32,7 @@ import com.zbm.dainty.util.IDockingHeaderUpdateListener;
 import com.zbm.dainty.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,8 +46,6 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 public class HistoryFragment extends Fragment {
     private HistoryListView mList;
     private RelativeLayout selectMoreBar;
-    private Button confirmDelete;
-    private Button cancelDelete;
     private ImageView emptyHistory;
     private Map<String, List<HistoryItemBean>> mHistoryData;
     private List<String> parentList;  //header view的日期标题
@@ -58,17 +57,18 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHistoryData = new HashMap<>();
+        mHistoryData = new LinkedHashMap<>();
         parentList = new ArrayList<>();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_history,container,false);
         selectMoreBar=view.findViewById(R.id.history_select_more_bar);
-        confirmDelete=view.findViewById(R.id.history_confirm_delete);
-        cancelDelete=view.findViewById(R.id.history_cancel_delete);
+        Button confirmDelete = view.findViewById(R.id.history_confirm_delete);
+        Button cancelDelete = view.findViewById(R.id.history_cancel_delete);
         emptyHistory=view.findViewById(R.id.empty_history);
         mList=view.findViewById(R.id.history_list);
 
@@ -144,6 +144,7 @@ public class HistoryFragment extends Fragment {
                 showNormalDialog();
             }
         });
+        @SuppressLint("InflateParams")
         View contentView = ((LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.history_item_delete_window, null);
         Button editButton = contentView.findViewById(R.id.editButton);
         editButton.setOnClickListener(new View.OnClickListener() {

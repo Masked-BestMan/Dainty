@@ -24,9 +24,7 @@ import java.text.DecimalFormat;
 public class PreferenceWithRightIcon extends Preference {
     private Context context;
     private long total_flow=0;
-    private int type;     //默认0是普通的设置项，其他数字为带右标题流量框
     private String left,right;
-    private DecimalFormat df=new DecimalFormat("#.00");
 
     public PreferenceWithRightIcon(Context context, AttributeSet attrs) {
         this(context,attrs,0);
@@ -37,9 +35,9 @@ public class PreferenceWithRightIcon extends Preference {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.PreferenceWithRightIcon);
         left = ta.getString(R.styleable.PreferenceWithRightIcon_left_title);
         right = ta.getString(R.styleable.PreferenceWithRightIcon_right_title);
-        type = ta.getInt(R.styleable.PreferenceWithRightIcon_type,0);
+        int type = ta.getInt(R.styleable.PreferenceWithRightIcon_type, 0);//默认0是普通的设置项，其他数字为带右标题流量框
         ta.recycle();
-        if (type!=0){
+        if (type !=0){
             getNetFlow();
             String unit;
             double flow;
@@ -56,7 +54,8 @@ public class PreferenceWithRightIcon extends Preference {
                 flow=total_flow/Math.pow(1024,3);
                 unit="GB";
             }
-            right=df.format(flow)+unit;
+            DecimalFormat df = new DecimalFormat("#.00");
+            right= df.format(flow)+unit;
         }
     }
 

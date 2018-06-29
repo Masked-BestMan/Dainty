@@ -1,5 +1,6 @@
 package com.zbm.dainty.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -34,12 +35,9 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
  */
 
 public class LabelFragment extends Fragment {
-    private ListView mList;
     private CollectionListAdapter adapter;
     private PopupWindow deleteWindow;
     private RelativeLayout selectMoreBar;
-    private Button confirmDelete;
-    private Button cancelDelete;
     private ArrayList<Map<String, Object>> mData = new ArrayList<>();
     private List<Integer> selectedItemList = new ArrayList<>();
     private int selectedPosition;
@@ -48,14 +46,15 @@ public class LabelFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_label,container,false);
-        mList=view.findViewById(R.id.collection_list);
+        ListView mList = view.findViewById(R.id.collection_list);
         selectMoreBar=view.findViewById(R.id.collection_select_more_bar);
-        confirmDelete=view.findViewById(R.id.collection_confirm_delete);
-        cancelDelete=view.findViewById(R.id.collection_cancel_delete);
+        Button confirmDelete = view.findViewById(R.id.collection_confirm_delete);
+        Button cancelDelete = view.findViewById(R.id.collection_cancel_delete);
 
         adapter=new CollectionListAdapter(getActivity(),mData);
         adapter.setOnCheckChangedListener(new CollectionListAdapter.OnCheckChangedListener() {
@@ -103,6 +102,7 @@ public class LabelFragment extends Fragment {
                 return true;
             }
         });
+        @SuppressLint("InflateParams")
         View contentView = ((LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.history_item_delete_window, null);
         Button editButton = contentView.findViewById(R.id.editButton);
         editButton.setOnClickListener(new View.OnClickListener() {

@@ -15,9 +15,12 @@ import com.zbm.dainty.R;
 
 public class MingPreferenceCategory extends PreferenceCategory {
     private Context context;
+
+    @SuppressWarnings("unused")
     public MingPreferenceCategory(Context context, AttributeSet attrs) {
         this(context, attrs,0);
     }
+
     public MingPreferenceCategory(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context=context;

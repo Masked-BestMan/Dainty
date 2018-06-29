@@ -21,9 +21,12 @@ import com.zbm.dainty.R;
 public class PreferenceHead extends Preference {
     private Context context;
     private View.OnClickListener onBackButtonClickListener;
-    public PreferenceHead(Context context,AttributeSet attrs){
+
+    @SuppressWarnings("unused")
+    public PreferenceHead(Context context, AttributeSet attrs){
         this(context,attrs,0);
     }
+
     public PreferenceHead(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context,attrs,defStyleAttr);
         this.context=context;

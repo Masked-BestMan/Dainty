@@ -19,30 +19,21 @@ import java.io.Serializable;
         return historyID;
     }
 
-    public void setHistoryID(int historyID) {
-        this.historyID = historyID;
-    }
 
     public String getHistoryNAME() {
         return historyNAME;
-    }
-
-    public void setHistoryNAME(String historyNAME) {
-        this.historyNAME = historyNAME;
     }
 
     public String getHistoryURI() {
         return historyURI;
     }
 
-    public void setHistoryURI(String historyURI) {
-        this.historyURI = historyURI;
-    }
-
+    @SuppressWarnings("unused")
     public String getHistoryTIME() {
         return historyTIME;
     }
 
+    @SuppressWarnings("unused")
     public void setHistoryTIME(String historyTIME) {
         this.historyTIME = historyTIME;
     }

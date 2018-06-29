@@ -28,6 +28,7 @@ public abstract class UpdatableFragmentPagerAdapter extends PagerAdapter {
     @NonNull
     private final LongSparseArray<Fragment.SavedState> mSavedStates = new LongSparseArray<>();
 
+    @SuppressWarnings("WeakerAccess")
     public UpdatableFragmentPagerAdapter(@NonNull FragmentManager fm) {
         mFragmentManager = fm;
     }

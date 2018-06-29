@@ -200,20 +200,10 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 try {
                     db.execSQL(sql);
                 } catch (SQLException e) {
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "记录出错", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Log.d("DBHelper", "记录出错");
                     return;
                 }
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context, "记录成功", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                Log.d("DBHelper", "记录成功");
             }
 
         }).start();
@@ -262,19 +252,9 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                     values.put("collectionTIME", collectionTime);
                     db.replace(DaintyDBHelper.CTB_NAME, null, values);
                 } catch (SQLException e) {
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "收藏出错", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Log.d("DBHelper", "收藏出错");
                 }
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context, "收藏成功", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                Log.d("DBHelper", "收藏成功");
             }
 
         }).start();
