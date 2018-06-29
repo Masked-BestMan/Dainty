@@ -467,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                 webViewFragment.getInnerWebView().onPause();
                 webViewFragment.getInnerWebView().pauseTimers();
             }
-
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
             mViewPager.setFullScreen(false);
 
             webLayout.scrollTo(0, 0);
@@ -486,7 +486,7 @@ public class MainActivity extends AppCompatActivity {
             fixWebPage(mViewPager.getCurrentItem());
 
             webView = WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView(); //定位当前的WebView对象
-
+            webView.setLayerType(View.LAYER_TYPE_NONE,null);
             isZoom = false;
 
             for (WebViewFragment webViewFragment:WebPageHelper.webpagelist) {
