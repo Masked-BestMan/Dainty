@@ -16,11 +16,12 @@
         android:visibility="visible" />
     <ImageView
         android:id="@+id/download_record_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_toEndOf="@id/download_record_delete_checkbox"
         android:layout_centerVertical="true"
-        tool:src="@drawable/collect"/>
+        tool:src="@drawable/collect"
+        tool:ignore="ContentDescription" />
     <TextView
         android:id="@+id/download_record_name"
         android:layout_width="match_parent"

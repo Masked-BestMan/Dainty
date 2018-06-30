@@ -3,7 +3,6 @@ package com.zbm.dainty.ui;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -52,21 +51,22 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
     private int touchPointX, touchPointY, mHeight, mWidth;
     private PopupWindow quickAction;
     private RecyclerView popupMenuList;
-    private String extra, url;
+    private String extra, url="file:///android_asset/index.html";
 
     public WebViewFragment() {
     }
 
     @SuppressLint("ValidFragment")
     public WebViewFragment(Bundle savedInstanceState, OnWebViewListener onWebViewListener) {
-        this(savedInstanceState, onWebViewListener, "file:///android_asset/index.html");
+        this(savedInstanceState, onWebViewListener, null);
     }
 
     @SuppressLint("ValidFragment")
     public WebViewFragment(Bundle savedInstanceState, OnWebViewListener onWebViewListener, String url) {
         bundle = savedInstanceState;  //为空表示是用户手动添加标签页
         this.wl = onWebViewListener;
-        this.url = url;
+        if (url!=null)
+            this.url = url;
     }
 
     @Override
@@ -110,7 +110,7 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
                         return true;    //某些网站会重定向至非有效网址，返回真取消加载该网址
                     //只有加载重定向网页才会调用
                     Log.d("appo", "shouldOverride:" + url);
-                    return url.equals(webView.getUrl());
+                    return false;
                 }
 
                 @Override

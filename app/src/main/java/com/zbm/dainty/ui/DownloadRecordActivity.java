@@ -362,7 +362,6 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                     }
                     pauseListRemoveLog.add(selectedBean.getDownloadUrl());
                     pauseList.remove(selectedBean.getDownloadUrl());
-                    //data.remove((int) selectedItemList.get(i));
                 }
                 int removeNum=-1;
                 for (int i:selectedItemList){
@@ -512,7 +511,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         if (!fileName.equals("") && fileName.length() > 3) {
             int dot = fileName.lastIndexOf(".");
             if (dot > 0) {
-                return fileName.substring(dot + 1);
+                return fileName.substring(dot + 1).toLowerCase();
             } else {
                 return "";
             }
@@ -522,9 +521,13 @@ public class DownloadRecordActivity extends SwipeBackActivity {
 
     private Intent getFileIntent(File file) {
         Uri uri = Uri.fromFile(file);
+        Intent intent ;
         String type = getMIMEType(file);
+        if (type.equals("text/html"))
+            intent = new Intent("com.zbm.dainty.action.VIEW");
+        else
+            intent = new Intent("android.intent.action.VIEW");
         Log.i("tag", "type=" + type);
-        Intent intent = new Intent("android.intent.action.VIEW");
         intent.addCategory("android.intent.category.DEFAULT");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(uri, type);
@@ -569,7 +572,25 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 /* android.permission.INSTALL_PACKAGES */
                 type = "application/vnd.android.package-archive";
                 break;
-
+            case "htm":
+            case "html":
+            case "jsp":
+            case "php":
+            case "xml":
+                type="text/html";
+                break;
+            case "7z":
+            case "zip":
+            case "rar":
+            case "txt":
+            case "doc":
+            case "docx":
+            case "xls":
+            case "xlsx":
+            case "ppt":
+            case "pptx":
+                type="application/*";
+                break;
             default:
                 /*如果无法直接打开，就跳出软件列表给用户选择 */
                 type = "*/*";

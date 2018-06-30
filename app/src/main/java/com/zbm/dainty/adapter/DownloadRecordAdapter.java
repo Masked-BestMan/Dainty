@@ -33,14 +33,15 @@ public class DownloadRecordAdapter extends BaseAdapter {
     private List<FileDownloadBean> data;
     private LayoutInflater mInflater;
     private boolean canSelectMore;
-    private boolean restoreCheckBox=false;
+    private boolean restoreCheckBox = false;
     private OnCheckChangedListener onCheckChangedListener;
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
     private Context context;
-    public DownloadRecordAdapter(Context context, List<FileDownloadBean> data){
-        this.context=context;
-        this.data=data;
-        mInflater=LayoutInflater.from(context);
+
+    public DownloadRecordAdapter(Context context, List<FileDownloadBean> data) {
+        this.context = context;
+        this.data = data;
+        mInflater = LayoutInflater.from(context);
         DateFormat.getInstance();
     }
 
@@ -59,6 +60,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
     public void setCanSelectMore(boolean canSelectMore) {
         this.canSelectMore = canSelectMore;
     }
+
     @Override
     public int getCount() {
         return data.size();
@@ -90,20 +92,20 @@ public class DownloadRecordAdapter extends BaseAdapter {
     @SuppressLint("SetTextI18n")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView==null){
-            if (getItemViewType(position)==0) {
-                DownloadingHolder holder=new DownloadingHolder();
-                convertView = mInflater.inflate(R.layout.downloading_list_item, parent,false);
+        if (convertView == null) {
+            if (getItemViewType(position) == 0) {
+                DownloadingHolder holder = new DownloadingHolder();
+                convertView = mInflater.inflate(R.layout.downloading_list_item, parent, false);
                 holder.icon = convertView.findViewById(R.id.downloading_icon);
                 holder.name = convertView.findViewById(R.id.downloading_filename);
                 holder.speed = convertView.findViewById(R.id.download_speed);
                 holder.progressBar = convertView.findViewById(R.id.download_progress);
-                holder.downloadStatus=convertView.findViewById(R.id.download_status);
+                holder.downloadStatus = convertView.findViewById(R.id.download_status);
                 holder.checkBox = convertView.findViewById(R.id.download_record_delete_checkbox);
                 convertView.setTag(holder);
-            }else {
+            } else {
                 ViewHolder holder = new ViewHolder();
-                convertView = mInflater.inflate(R.layout.download_record_list_item, parent,false);
+                convertView = mInflater.inflate(R.layout.download_record_list_item, parent, false);
                 holder.icon = convertView.findViewById(R.id.download_record_icon);
                 holder.name = convertView.findViewById(R.id.download_record_name);
                 holder.describe = convertView.findViewById(R.id.download_record_modified_date_and_size);
@@ -113,73 +115,142 @@ public class DownloadRecordAdapter extends BaseAdapter {
 
         }
 
-        if (getItemViewType(position)==0){
-            DownloadingHolder holder= (DownloadingHolder) convertView.getTag();
-            holder.icon.setImageResource(R.mipmap.ic_launcher);
+        String suffix = getExtensionName(data.get(position).getFileName());
+        int image;
+        switch (suffix) {
+            case "apk":
+                image = R.drawable.fileicon_apk;
+                break;
+            case "m4a":
+            case "mp3":
+            case "mid":
+            case "xmf":
+            case "ogg":
+            case "wav":
+                image = R.drawable.fileicon_audio;
+                break;
+            case "3gp":
+            case "mp4":
+                image = R.drawable.fileicon_video;
+                break;
+            case "jpg":
+            case "gif":
+            case "png":
+            case "jpeg":
+            case "bmp":
+                image = R.drawable.fileicon_image;
+                break;
+            case "pdf":
+                image = R.drawable.fileicon_pdf;
+                break;
+            case "txt":
+            case "doc":
+            case "docx":
+            case "xls":
+            case "xlsx":
+            case "ppt":
+            case "pptx":
+                image = R.drawable.fileicon_document;
+                break;
+            case "rar":
+            case "zip":
+            case "7z":
+                image = R.drawable.fileicon_compressfile;
+                break;
+            case "htm":
+            case "html":
+            case "jsp":
+            case "php":
+            case "xml":
+                image = R.drawable.fileicon_webpage;
+                break;
+            default:
+                image = R.drawable.fileicon_default;
+        }
+        if (getItemViewType(position) == 0) {
+            DownloadingHolder holder = (DownloadingHolder) convertView.getTag();
+            holder.icon.setImageResource(image);
             holder.name.setText(data.get(position).getFileName());
             holder.progressBar.setMax(data.get(position).getFileSize());
             holder.progressBar.setProgress(data.get(position).getDownloadProgress());
             if (data.get(position).isDownloading()) {
                 holder.speed.setText(data.get(position).getSpeed());
                 holder.downloadStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.stop_download));
-            }else {
+            } else {
                 holder.speed.setText("暂停");
                 holder.downloadStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.start_download));
             }
-            if(canSelectMore){
+            if (canSelectMore) {
                 holder.checkBox.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 holder.checkBox.setVisibility(View.GONE);
             }
-            if (restoreCheckBox)holder.checkBox.setChecked(false);
+            if (restoreCheckBox) holder.checkBox.setChecked(false);
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    onCheckChangedListener.onCheckChanged((int) compoundButton.getTag(R.id.download_record_delete_checkbox),b);
+                    onCheckChangedListener.onCheckChanged((int) compoundButton.getTag(R.id.download_record_delete_checkbox), b);
                 }
             });
-            holder.checkBox.setTag(R.id.download_record_delete_checkbox,position);
-        }else {
-            ViewHolder holder= (ViewHolder) convertView.getTag();
-            holder.icon.setImageResource(R.mipmap.ic_launcher);
+            holder.checkBox.setTag(R.id.download_record_delete_checkbox, position);
+        } else {
+            ViewHolder holder = (ViewHolder) convertView.getTag();
+            holder.icon.setImageResource(image);
             holder.name.setText(data.get(position).getFileName());
-            holder.describe.setText(format.format(new Date(data.get(position).getLastModified()))+"   "+ Formatter.formatFileSize(context,data.get(position).getFileSize()));
-            if(canSelectMore){
+            holder.describe.setText(format.format(new Date(data.get(position).getLastModified())) + "   " + Formatter.formatFileSize(context, data.get(position).getFileSize()));
+            if (canSelectMore) {
                 holder.checkBox.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 holder.checkBox.setVisibility(View.GONE);
             }
-            if (restoreCheckBox)holder.checkBox.setChecked(false);
+            if (restoreCheckBox) holder.checkBox.setChecked(false);
             holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    onCheckChangedListener.onCheckChanged((int) compoundButton.getTag(R.id.download_record_delete_checkbox),b);
+                    onCheckChangedListener.onCheckChanged((int) compoundButton.getTag(R.id.download_record_delete_checkbox), b);
                 }
             });
-            holder.checkBox.setTag(R.id.download_record_delete_checkbox,position);
+            holder.checkBox.setTag(R.id.download_record_delete_checkbox, position);
         }
 
-        ListView.LayoutParams params = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, MyUtil.dip2px(context,70));//设置宽度和高度
+        ListView.LayoutParams params = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, MyUtil.dip2px(context, 70));//设置宽度和高度
         convertView.setLayoutParams(params);
         return convertView;
     }
-    public interface OnCheckChangedListener{
-        void onCheckChanged(int position,boolean checked);
+
+    public interface OnCheckChangedListener {
+        void onCheckChanged(int position, boolean checked);
     }
 
-    private static class ViewHolder{
+    private static class ViewHolder {
         ImageView icon;
         TextView name;
         TextView describe;
         CheckBox checkBox;
     }
 
-    private static class DownloadingHolder{
+    private static class DownloadingHolder {
         ImageView icon;
         TextView name;
         TextView speed;
         ProgressBar progressBar;
         ImageView downloadStatus;
         CheckBox checkBox;
+    }
+
+    /**
+     * 获取文件扩展名
+     */
+    private static String getExtensionName(String filename) {
+        if ((filename != null) && (filename.length() > 0)) {
+            int dot = filename.lastIndexOf('.');
+            if ((dot > -1) && (dot < (filename.length() - 1))) {
+                return filename.substring(dot + 1);
+            }
+        }
+        if (filename != null)
+            return filename.toLowerCase();
+        else
+            return null;
     }
 }

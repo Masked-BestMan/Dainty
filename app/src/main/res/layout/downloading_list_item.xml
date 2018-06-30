@@ -16,11 +16,12 @@
 
     <ImageView
         android:id="@+id/downloading_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/download_record_delete_checkbox"
-        tool:src="@drawable/collect" />
+        tool:src="@drawable/collect"
+        tool:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/downloading_filename"
@@ -65,6 +66,7 @@
         android:layout_height="30dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/stop_download"/>
+        android:src="@drawable/stop_download"
+        tool:ignore="ContentDescription" />
 
 </RelativeLayout>
