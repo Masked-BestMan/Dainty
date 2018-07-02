@@ -24,14 +24,15 @@
             android:layout_marginTop="35dp"
             android:text="@string/collection_edit_title"
             android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
         <TextView
             android:id="@+id/collection_edit_confirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/collection_edit_confirm_button"
+            android:gravity="center"
             android:clickable="true"
-            android:textSize="18sp"
+            android:textSize="17sp"
             android:textColor="@android:color/white"
             android:layout_marginTop="35dp"
             android:layout_marginEnd="10dp"

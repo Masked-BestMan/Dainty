@@ -1,7 +1,6 @@
 package com.zbm.dainty.task;
 
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -25,18 +25,19 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 
 public class ImageTask extends AsyncTask<String, Void, String> {
-    @SuppressLint("StaticFieldLeak")
-    private Context context;
+
+    private WeakReference<Context> contextReference;
     private String dir;
 
     public ImageTask(Context context) {
-        this.context = context.getApplicationContext();
+        contextReference=new WeakReference<>(context);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dir = PreferenceManager.getDefaultSharedPreferences(context).getString("downloadPath", "/storage/emulated/0/DaintyDownloads");
+        if (contextReference.get()!=null)
+            dir = PreferenceManager.getDefaultSharedPreferences(contextReference.get()).getString("downloadPath", "/storage/emulated/0/DaintyDownloads");
     }
 
     @Override
@@ -83,14 +84,17 @@ public class ImageTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (s.equals("success"))
-            ClickableToast.makeClickText(context, "保存成功", "查看", Toast.LENGTH_SHORT, new ClickableToast.OnToastClickListener() {
-                @Override
-                public void onToastClick() {
-                    context.startActivity(new Intent(context, DownloadRecordActivity.class));
-                }
-            }).show();
-        else
-            Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show();
+        if (contextReference.get()!=null) {
+            final Context context=contextReference.get();
+            if (s.equals("success"))
+                ClickableToast.makeClickText(context, "保存成功", "查看", Toast.LENGTH_SHORT, new ClickableToast.OnToastClickListener() {
+                    @Override
+                    public void onToastClick() {
+                        context.startActivity(new Intent(context, DownloadRecordActivity.class));
+                    }
+                }).show();
+            else
+                Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show();
+        }
     }
 }

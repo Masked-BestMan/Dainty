@@ -15,7 +15,7 @@ public class ClearCacheTask extends AsyncTask<String,Void,Boolean> {
     @SuppressLint("StaticFieldLeak")
     private Context context;
     public ClearCacheTask(Context context){
-        this.context=context;
+        this.context=context.getApplicationContext();
     }
     @Override
     protected Boolean doInBackground(String... strings) {

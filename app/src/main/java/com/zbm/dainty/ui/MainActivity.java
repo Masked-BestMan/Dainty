@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -75,7 +76,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     @BindView(R.id.home_button)
     ImageView homeButton;
@@ -145,19 +146,7 @@ public class MainActivity extends AppCompatActivity {
         setTheme(R.style.AppTheme_TransparentActivity);
         getWindow().setFormat(PixelFormat.TRANSLUCENT);
         getWindow().setBackgroundDrawable(null);
-        startService(new Intent(this, WeatherService.class));
-        //网络状态变化广播监听
 
-        IntentFilter mFilter = new IntentFilter();
-        mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(networkChange, mFilter);
-
-        //天气结果广播监听
-        IntentFilter mFilter2 = new IntentFilter();
-        mFilter2.addAction("weather_refresh");
-        registerReceiver(refresh, mFilter2);
-
-        setContentView(R.layout.activity_main);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
@@ -169,6 +158,19 @@ public class MainActivity extends AppCompatActivity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
         }
+
+        //网络状态变化广播监听
+        IntentFilter mFilter = new IntentFilter();
+        mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChange, mFilter);
+
+        //天气结果广播监听
+        IntentFilter mFilter2 = new IntentFilter();
+        mFilter2.addAction("weather_refresh");
+        registerReceiver(refresh, mFilter2);
+
+        setContentView(R.layout.activity_main);
+
         PreferenceManager.setDefaultValues(this, R.xml.pref_settings, true);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         ButterKnife.bind(this);
@@ -178,11 +180,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             initPermission();
 
+        EventBus.getDefault().register(this);
     }
 
     @SuppressLint("SetTextI18n")
@@ -253,8 +254,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void initPermission() {
         String[] permissions = {
-                Manifest.permission_group.LOCATION,
-                Manifest.permission_group.STORAGE};
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         ArrayList<String> toApplyList = new ArrayList<>();
 
@@ -265,9 +268,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+        Log.d("rer",toApplyList.size()+"个");
         String tmpList[] = new String[toApplyList.size()];
         if (!toApplyList.isEmpty()) {
             ActivityCompat.requestPermissions(this, toApplyList.toArray(tmpList), 121);
+        }else {
+            startService(new Intent(this, WeatherService.class));
         }
 
     }
@@ -282,11 +288,7 @@ public class MainActivity extends AppCompatActivity {
             }
             initDot(count);
         } else {
-            String url = null;
-            Intent intent = getIntent();
-            String action = intent.getAction();
-            if (Intent.ACTION_VIEW.equals(action))
-                url = intent.getDataString();
+            String url = getIntent().getDataString();
             Log.d("Main", "onCreate地址Path：" + url);
             WebViewFragment fragment = new WebViewFragment(null, initWebView(), url);
             WebPageHelper.webpagelist.add(fragment);
@@ -350,7 +352,6 @@ public class MainActivity extends AppCompatActivity {
                 switch (selectMenuPosition) {
                     case -1:
                         startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        overridePendingTransition(R.anim.left_in, 0);
                         break;
                     case 0:
                         webView.loadUrl("http://dushu.m.baidu.com");
@@ -371,19 +372,15 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("title", webView.getTitle());
                         intent.putExtra("url", webView.getUrl());
                         startActivity(intent);
-                        overridePendingTransition(R.anim.left_in, 0);
                         break;
                     case 4:
                         startActivityForResult(new Intent(MainActivity.this, DownloadRecordActivity.class), 1);
-                        overridePendingTransition(R.anim.left_in, 0);
                         break;
                     case 5:
                         startActivityForResult(new Intent(MainActivity.this, HistoryAndLabelActivity.class), 1);
-                        overridePendingTransition(R.anim.left_in, 0);
                         break;
                     case 6:
                         startActivity(new Intent(MainActivity.this, ConfigActivity.class));
-                        overridePendingTransition(R.anim.left_in, 0);
                         break;
                 }
                 selectMenuPosition = -2;
@@ -781,7 +778,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 121) {
             boolean isAllGranted = true;
-
+            Log.d("rer", "调用onRequestPermissionsResult");
             // 判断是否所有的权限都已经授予了
             for (int grant : grantResults) {
                 if (grant != PackageManager.PERMISSION_GRANTED) {
@@ -793,9 +790,34 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d("rer", "isGrant:" + isAllGranted);
             if (!isAllGranted) {
-                // 如果用户拒绝授权，则退出
-                finish();
-            }
+                // 如果用户拒绝授权，则弹出对话框让用户自行设置
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("警告");
+                builder.setMessage("当前应用缺少必要权限，请点击“设置”开启权限或点击“取消”关闭应用。");
+                builder.setPositiveButton("设置", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setData(Uri.fromParts("package", MainActivity.this.getPackageName(), null));
+                        MainActivity.this.startActivity(intent);
+                    }
+                }).
+                        setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // TODO Auto-generated method stub
+                                MainActivity.this.finish();
+                            }
+                        });
+
+                AlertDialog dialog = builder.show();
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+            }else
+                startService(new Intent(this, WeatherService.class));
         }
     }
 

@@ -16,15 +16,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
  * Created by zbm阿铭 on 2018/3/21.
  */
+
 @SuppressLint("StaticFieldLeak")
 public class DownloaderTask extends AsyncTask<String, Integer, String> {
     private Context context;
+    private WeakReference<Context> contextReference;
     private String downloadUrl;
     private boolean isPause;   //暂停下载
     private String fileName;
@@ -35,7 +38,8 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
     private int downloadLength;      //已下载的长度
 
     public DownloaderTask(Context context, String fileName, File filePath, int fileSize, int downloadLength) {
-        this.context = context;
+        contextReference=new WeakReference<>(context);
+        this.context=context.getApplicationContext();
         this.fileName = fileName;
         this.filePath = filePath;
         this.fileSize = fileSize;
@@ -130,13 +134,14 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
         super.onPreExecute();
         DaintyDBHelper.getDaintyDBHelper(context).deleteTableItem(DaintyDBHelper.DTB_NAME,
                 "where downloadUrl='" + downloadUrl + "'");
-//        SQLiteDatabase db = DaintyDBHelper.getDaintyDBHelper(context).getWritableDatabase();
-//        db.execSQL("delete from " + DaintyDBHelper.DTB_NAME + " where downloadUrl='" + downloadUrl + "'");
         ClickableToast.makeClickText(context, "开始下载", "查看", Toast.LENGTH_SHORT,
                 new ClickableToast.OnToastClickListener() {
             @Override
             public void onToastClick() {
-                context.startActivity(new Intent(context, DownloadRecordActivity.class));
+                if (contextReference.get()!=null) {
+                    Context c=contextReference.get();
+                    c.startActivity(new Intent(c, DownloadRecordActivity.class));
+                }
             }
         }).show();
     }
@@ -177,8 +182,6 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
         context.sendBroadcast(intent);
         DownloadHelper.downloadList.remove(this);
 
-        //解压
-        //new ZipExtractorTask(context, result.getAbsolutePath(), directory.getAbsolutePath() + "/" + fileNameWithoutPostFix, false).execute();
     }
 
 

@@ -27,7 +27,7 @@
             android:layout_centerHorizontal="true"
             android:text="@string/login"
             android:textColor="#fff"
-            android:textSize="17sp" />
+            android:textSize="20sp" />
 
     </RelativeLayout>
 
@@ -47,7 +47,8 @@
             android:hint="@string/login_account"
             android:maxLines="1"
             android:padding="5dp"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:inputType="text" />
 
         <EditText
             android:id="@+id/password"

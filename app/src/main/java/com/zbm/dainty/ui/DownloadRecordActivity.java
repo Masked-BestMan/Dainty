@@ -9,9 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -24,8 +22,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -39,9 +35,11 @@ import android.widget.Toast;
 import com.zbm.dainty.adapter.DownloadRecordAdapter;
 import com.zbm.dainty.R;
 import com.zbm.dainty.bean.FileDownloadBean;
+import com.zbm.dainty.service.FileListenerService;
 import com.zbm.dainty.task.DownloaderTask;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.util.DownloadHelper;
+import com.zbm.dainty.util.FileUtil;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.SwipeBackActivity;
 import com.zbm.dainty.widget.TextProgressBar;
@@ -100,17 +98,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                    | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            );
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        startService(new Intent(this, FileListenerService.class));
         setContentView(R.layout.activity_download_record);
         IntentFilter mFilter = new IntentFilter();
         mFilter.addAction("download_progress_refresh");
@@ -128,9 +116,11 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         }, 0, 1000);
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopService(new Intent(this,FileListenerService.class));
         unregisterReceiver(downloadStatus);
         if (timer != null) {
             timer.cancel();
@@ -177,8 +167,9 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 } else {
                     final FileDownloadBean fileDownloadBean = data.get(position);
                     if (fileDownloadBean.isFinished()) {
-
-                        startActivity(getFileIntent(new File(data.get(position).getFilePath())));
+                        Intent intent=FileUtil.getFileIntent(new File(data.get(position).getFilePath()));
+                        intent.putExtra("file_path",data.get(position).getFilePath());
+                        startActivity(intent);
 
                     } else {
                         final ImageView downloadStatus = view.findViewById(R.id.download_status);
@@ -409,6 +400,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                     files = savePath.listFiles();
                     if (files != null) {
                         for (File file : files) {
+                            if (file.isDirectory())continue;
                             if (data.contains(new FileDownloadBean(file.getName()))) continue;
                             FileDownloadBean fileInfo = new FileDownloadBean(file.getName());
                             DownloaderTask task = DownloadHelper.getDownloadFile(file.getAbsolutePath());
@@ -502,100 +494,4 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         }
     };
 
-    /**
-     * 根据后缀获取文件的类型
-     *
-     * @return String 文件的类型
-     **/
-    private String getFileType(String fileName) {
-        if (!fileName.equals("") && fileName.length() > 3) {
-            int dot = fileName.lastIndexOf(".");
-            if (dot > 0) {
-                return fileName.substring(dot + 1).toLowerCase();
-            } else {
-                return "";
-            }
-        }
-        return "";
-    }
-
-    private Intent getFileIntent(File file) {
-        Uri uri = Uri.fromFile(file);
-        Intent intent ;
-        String type = getMIMEType(file);
-        if (type.equals("text/html"))
-            intent = new Intent("com.zbm.dainty.action.VIEW");
-        else
-            intent = new Intent("android.intent.action.VIEW");
-        Log.i("tag", "type=" + type);
-        intent.addCategory("android.intent.category.DEFAULT");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(uri, type);
-        return intent;
-    }
-
-    private String getMIMEType(File f) {
-        String type;
-        String fName = f.getName();
-        /* 取得扩展名 */
-        String end = getFileType(fName);
-
-        /* 依扩展名的类型决定MimeType */
-        switch (end) {
-            case "pdf":
-                type = "application/pdf";
-                break;
-
-            case "m4a":
-            case "mp3":
-            case "mid":
-            case "xmf":
-            case "ogg":
-            case "wav":
-                type = "audio/*";
-                break;
-
-            case "3gp":
-            case "mp4":
-                type = "video/*";
-                break;
-
-            case "jpg":
-            case "gif":
-            case "png":
-            case "jpeg":
-            case "bmp":
-                type = "image/*";
-                break;
-
-            case "apk":
-                /* android.permission.INSTALL_PACKAGES */
-                type = "application/vnd.android.package-archive";
-                break;
-            case "htm":
-            case "html":
-            case "jsp":
-            case "php":
-            case "xml":
-                type="text/html";
-                break;
-            case "7z":
-            case "zip":
-            case "rar":
-            case "txt":
-            case "doc":
-            case "docx":
-            case "xls":
-            case "xlsx":
-            case "ppt":
-            case "pptx":
-                type="application/*";
-                break;
-            default:
-                /*如果无法直接打开，就跳出软件列表给用户选择 */
-                type = "*/*";
-                break;
-        }
-        return type;
-    }
 }

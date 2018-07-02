@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.zbm.dainty.R;
 import com.zbm.dainty.bean.FileDownloadBean;
+import com.zbm.dainty.util.FileUtil;
 import com.zbm.dainty.util.MyUtil;
 
 import java.text.DateFormat;
@@ -115,7 +116,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
 
         }
 
-        String suffix = getExtensionName(data.get(position).getFileName());
+        String suffix = FileUtil.getExtensionName(data.get(position).getFileName());
         int image;
         switch (suffix) {
             case "apk":
@@ -213,7 +214,7 @@ public class DownloadRecordAdapter extends BaseAdapter {
             holder.checkBox.setTag(R.id.download_record_delete_checkbox, position);
         }
 
-        ListView.LayoutParams params = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, MyUtil.dip2px(context, 70));//设置宽度和高度
+        ListView.LayoutParams params = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, MyUtil.dip2px(context, 65));//设置宽度和高度
         convertView.setLayoutParams(params);
         return convertView;
     }
@@ -236,21 +237,5 @@ public class DownloadRecordAdapter extends BaseAdapter {
         ProgressBar progressBar;
         ImageView downloadStatus;
         CheckBox checkBox;
-    }
-
-    /**
-     * 获取文件扩展名
-     */
-    private static String getExtensionName(String filename) {
-        if ((filename != null) && (filename.length() > 0)) {
-            int dot = filename.lastIndexOf('.');
-            if ((dot > -1) && (dot < (filename.length() - 1))) {
-                return filename.substring(dot + 1);
-            }
-        }
-        if (filename != null)
-            return filename.toLowerCase();
-        else
-            return null;
     }
 }

@@ -12,7 +12,7 @@
     <!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位 -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- 用于读取手机当前的状态-->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!-- 写入扩展存储，向扩展卡写入数据，用于写入离线定位数据 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- 访问网络，网络定位需要上网 -->
@@ -22,7 +22,6 @@
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- 添加快捷方式 -->
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
@@ -31,11 +30,11 @@
 
     <application
         android:name=".DaintyApplication"
+        android:allowBackup="false"
         android:icon="@mipmap/dainty_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:allowBackup="false">
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="com.baidu.speech.APP_ID"
             android:value="10721288" />
@@ -45,63 +44,98 @@
         <meta-data
             android:name="com.baidu.speech.SECRET_KEY"
             android:value="ELZ5vce0V7bDWE8UwE2D3xGbPZa4Gtle" />
+
         <service
             android:name="com.baidu.speech.VoiceRecognitionService"
             android:exported="false" />
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="1hoZW66icR3oexRFbpX9mvosdIr4mkzO" >
-        </meta-data>
+            android:value="1hoZW66icR3oexRFbpX9mvosdIr4mkzO"/>
 
-        <activity android:name=".ui.MainActivity"
+        <activity
+            android:name=".ui.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:windowSoftInputMode="stateHidden|adjustResize"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <action android:name="com.zbm.dainty.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="http"/>
-                <data android:scheme="https"/>
-                <data android:scheme="file"/>
-                <data android:mimeType="text/html"/>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="com.zbm.dainty.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:scheme="file" />
+                <data android:mimeType="text/html" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.HistoryAndLabelActivity"
+        <activity
+            android:name=".ui.HistoryAndLabelActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.TransparentActivity"/>
-        <activity android:name=".ui.QueryActivity"
+            android:theme="@style/AppTheme.TransparentActivity" />
+        <activity
+            android:name=".ui.QueryActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/BaseTheme"/>
-        <activity android:name=".ui.ConfigActivity"
+            android:theme="@style/BaseTheme" />
+        <activity
+            android:name=".ui.ConfigActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.TransparentActivity"/>
-        <activity android:name=".ui.LoginActivity"
+            android:theme="@style/AppTheme.TransparentActivity" />
+        <activity
+            android:name=".ui.LoginActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.TransparentActivity"/>
+            android:theme="@style/AppTheme.TransparentActivity" />
 
         <service android:name=".util.WeatherService" />
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote"/>
-        <activity android:name=".ui.RecognizeActivity"
+            android:process=":remote" />
+        <service android:name=".service.FileListenerService"/>
+        <activity
+            android:name=".ui.RecognizeActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/BaseTheme"/>
-        <activity android:name=".ui.CollectionEditActivity"
+            android:theme="@style/BaseTheme" />
+        <activity
+            android:name=".ui.CollectionEditActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.TransparentActivity" />
+        <activity
+            android:name=".ui.DownloadRecordActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TransparentActivity"/>
-        <activity android:name=".ui.DownloadRecordActivity"
+
+        <activity
+            android:name=".ui.DecompressionActivity"
+            android:icon="@mipmap/decompression_manager"
+            android:label="@string/decompression_manager_title"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.TransparentActivity"
-            android:launchMode="singleTop"/>
+            android:theme="@style/AppTheme.TransparentActivity">
+            <intent-filter>
+                <action android:name="com.zbm.dainty.action.VIEW" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:mimeType="application/zip"
+                    android:scheme="file" />
+                <data
+                    android:mimeType="application/x-rar-compressed"
+                    android:scheme="file" />
+            </intent-filter>
+
+
+        </activity>
     </application>
 
 </manifest>

@@ -37,5 +37,7 @@
     <string name="popup_download_size">大小：</string>
     <string name="popup_download_button1">立即下载</string>
     <string name="popup_download_button2">取消</string>
-
+    <string name="decompression_manager_title">解压助手</string>
+    <string name="decompression_button">解压</string>
+    <string name="decompression_confirm">开始解压</string>
 </resources>

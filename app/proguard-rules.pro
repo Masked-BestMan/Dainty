@@ -170,6 +170,16 @@
 -dontwarn com.baidu.**
 
 
+#忽略ZipEntry.jar
+-keep class com.file.zip.**{ *; }
+-keep interface com.file.zip.**{ *; }
+-dontwarn com.file.zip.**
+
+#忽略java-unrar-0.5.jar
+-keep class de.innosystec.unrar.**{ *; }
+-keep interface de.innosystec.unrar.**{ *; }
+-dontwarn de.innosystec.unrar.**
+
 #忽略百度语音识别sdk
 -keep class com.baidu.speech.**{*;}
 

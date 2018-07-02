@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <RelativeLayout
+        android:id="@+id/decompression_manager_bar_theme"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        tool:background="#474747">
+
+        <Button
+            android:id="@+id/decompression_manager_back"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/close_window" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="35dp"
+            android:text="@string/decompression_manager_title"
+            android:textColor="#fff"
+            android:textSize="20sp" />
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/decompression_manager_unzip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/decompression_manager_bar_theme"
+        android:background="@drawable/list_item_selector"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:padding="13dp"
+        android:text="@string/decompression_button"
+        android:textColor="@color/text_color_deep_gray"
+        android:textSize="17sp" />
+    <TextView
+        android:id="@+id/title_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/decompression_manager_bar_theme"
+        android:layout_toStartOf="@id/decompression_manager_unzip"
+        android:ellipsize="start"
+        android:gravity="center_vertical"
+        android:padding="13dp"
+        android:singleLine="true"
+        android:textColor="@color/text_color_black"
+        android:textSize="17sp" />
+
+
+
+    <ListView
+        android:id="@+id/decompression_file_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/title_file" />
+
+</RelativeLayout>

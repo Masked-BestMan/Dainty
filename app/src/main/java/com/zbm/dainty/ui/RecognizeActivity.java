@@ -1,13 +1,16 @@
 package com.zbm.dainty.ui;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -53,8 +56,7 @@ public class RecognizeActivity extends AppCompatActivity implements EventListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recognize);
         ButterKnife.bind(this);
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M)
-            initPermission();
+
         asr = EventManagerFactory.create(this, "asr");
         asr.registerListener(this); //  EventListener 中 onEvent方法
         start();
@@ -74,6 +76,13 @@ public class RecognizeActivity extends AppCompatActivity implements EventListene
                 finish();
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M)
+            initPermission();
     }
 
     @Override
@@ -188,9 +197,33 @@ public class RecognizeActivity extends AppCompatActivity implements EventListene
             }
 
             if (!isAllGranted) {
-                // 如果用户拒绝授权，则退出
-                setResult(RESULT_CANCELED);
-                finish();
+                // 如果用户拒绝授权，则弹出对话框让用户自行设置
+                AlertDialog.Builder builder = new AlertDialog.Builder(RecognizeActivity.this);
+                builder.setTitle("警告");
+                builder.setMessage("当前应用缺少必要权限，请点击“设置”开启权限或点击“取消”关闭应用。");
+                builder.setPositiveButton("设置", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setData(Uri.fromParts("package", RecognizeActivity.this.getPackageName(), null));
+                        RecognizeActivity.this.startActivity(intent);
+                    }
+                }).
+                        setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // TODO Auto-generated method stub
+                                RecognizeActivity.this.setResult(RESULT_CANCELED);
+                                RecognizeActivity.this.finish();
+                            }
+                        });
+
+                AlertDialog dialog = builder.show();
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
             }
         }
     }

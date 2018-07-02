@@ -2,9 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
+    android:layout_height="65dp"
     android:padding="10dp"
-    tool:background="#fff">
+    tool:background="@android:color/white">
     <CheckBox
         android:id="@+id/download_record_delete_checkbox"
         android:layout_width="35dp"
@@ -34,16 +34,16 @@
         android:layout_toStartOf="@+id/download_speed"
         android:ellipsize="middle"
         android:singleLine="true"
-        android:textColor="@color/text_color_black"
-        android:textSize="18sp"
+        android:textColor="@color/text_color_deep_gray"
+        android:textSize="16sp"
         tool:text="测试.zip" />
 
     <TextView
         android:id="@+id/download_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/text_color_black"
-        android:textSize="18sp"
+        android:textColor="@color/text_color_deep_gray"
+        android:textSize="16sp"
         android:layout_toStartOf="@+id/download_status"
         android:layout_marginEnd="10dp"
         tool:text="24.2KB/s" />

@@ -27,6 +27,7 @@ import com.zbm.dainty.bean.FileDownloadBean;
 import com.zbm.dainty.ui.DownloadRecordActivity;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.util.DownloadHelper;
+import com.zbm.dainty.util.FileUtil;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.ClickableToast;
 
@@ -84,8 +85,8 @@ public class ResolveDownloadUrlTask extends AsyncTask<String, Void, Integer> {
                 do {
                     fileName1 = fileName;
                     String[] s = new String[2];
-                    s[0] = getFileNameNoEx(fileName1);
-                    s[1] = getExtensionName(fileName1);
+                    s[0] = FileUtil.getFileNameNoEx(fileName1);
+                    s[1] = FileUtil.getExtensionName(fileName1);
                     ++i;
                     if (i != 0) {
                         s[0] = s[0] + "(" + i + ")";
@@ -228,40 +229,15 @@ public class ResolveDownloadUrlTask extends AsyncTask<String, Void, Integer> {
         return filename;
     }
 
-    /**
-     * 获取文件扩展名
-     */
-    private static String getExtensionName(String filename) {
-        if ((filename != null) && (filename.length() > 0)) {
-            int dot = filename.lastIndexOf('.');
-            if ((dot > -1) && (dot < (filename.length() - 1))) {
-                return filename.substring(dot + 1);
-            }
-        }
-        return filename;
-    }
-
-    /**
-     * 获取不带扩展名的文件名
-     */
-    private static String getFileNameNoEx(String filename) {
-        if ((filename != null) && (filename.length() > 0)) {
-            int dot = filename.lastIndexOf('.');
-            if ((dot > -1) && (dot < (filename.length()))) {
-                return filename.substring(0, dot);
-            }
-        }
-        return filename;
-    }
 
     /**
      * 显示修改文件名对话框
      */
     private void showEditableDialog() {
         myPopupWindow.dismiss();
-        final String suffix = getExtensionName(fileName);
+        final String suffix = FileUtil.getExtensionName(fileName);
         final EditText et = new EditText(context);
-        et.setText(getFileNameNoEx(fileName));
+        et.setText(FileUtil.getFileNameNoEx(fileName));
         new AlertDialog.Builder(context).setTitle("请输入新的文件名")
                 .setIcon(android.R.drawable.sym_def_app_icon)
                 .setView(et)
