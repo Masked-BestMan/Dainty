@@ -1,6 +1,5 @@
 package com.zbm.dainty.util;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.zbm.dainty.bean.FileDownloadBean;
 import com.zbm.dainty.bean.HistoryItemBean;
@@ -188,7 +186,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
         }).start();
     }
 
-    public void updateHistoryTable(final Context context, final String url, final String title) {
+    public void updateHistoryTable(final String url, final String title) {
 
         new Thread(new Runnable() {
             @Override
@@ -237,7 +235,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void updateCollectionTable(final Context context, final byte[] icon, final String url, final String title) {
+    public void updateCollectionTable(final byte[] icon, final String url, final String title) {
         new Thread(new Runnable() {
             @Override
             public void run() {

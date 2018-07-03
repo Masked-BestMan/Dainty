@@ -86,7 +86,7 @@ public class CollectionEditActivity extends SwipeBackActivity {
             @Override
             public void onClick(View v) {
                 if(editToCollection.isChecked()) {
-                    DaintyDBHelper.getDaintyDBHelper(CollectionEditActivity.this).updateCollectionTable(CollectionEditActivity.this, PictureUtil.bitmapToBytes(icon),url,title);
+                    DaintyDBHelper.getDaintyDBHelper(CollectionEditActivity.this).updateCollectionTable(PictureUtil.bitmapToBytes(icon),url,title);
                 }
                 if (editToDesktop.isChecked()){
                     if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M)

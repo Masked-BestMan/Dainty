@@ -721,7 +721,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void insertTable(final String url, final String title) {
-        DaintyDBHelper.getDaintyDBHelper(this).updateHistoryTable(this, url, title);
+        DaintyDBHelper.getDaintyDBHelper(this).updateHistoryTable(url, title);
     }
 
     @Override
