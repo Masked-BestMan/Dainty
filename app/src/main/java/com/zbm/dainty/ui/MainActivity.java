@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -144,8 +143,8 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.AppTheme_TransparentActivity);
-        getWindow().setFormat(PixelFormat.TRANSLUCENT);
-        getWindow().setBackgroundDrawable(null);
+        //getWindow().setFormat(PixelFormat.TRANSLUCENT);
+        //getWindow().setBackgroundDrawable(null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();

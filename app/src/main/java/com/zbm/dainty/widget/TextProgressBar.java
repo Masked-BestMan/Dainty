@@ -11,7 +11,7 @@ import android.widget.ProgressBar;
 
 
 public class TextProgressBar extends ProgressBar {
-    private String text;
+    private String text="";
     private Paint mPaint;
     private int fontSize;
     public TextProgressBar(Context context) {

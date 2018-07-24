@@ -479,6 +479,8 @@ public class DownloadRecordActivity extends SwipeBackActivity {
             String totalSize = Formatter.formatFileSize(this, blockSize * totalBlocks);
             String availableSize = Formatter.formatFileSize(this, blockSize * availableBlocks);
             textProgressBar.setTextAndProgress("内置存储可用：" + availableSize + "/共：" + totalSize, (int) ((float) availableBlocks / totalBlocks * 100));
+        }else {
+            textProgressBar.setTextAndProgress("内置存储不可用",0);
         }
     }
     /*
