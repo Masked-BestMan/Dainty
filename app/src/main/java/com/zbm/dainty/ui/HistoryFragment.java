@@ -102,7 +102,7 @@ public class HistoryFragment extends Fragment {
                     HistoryItemBean hb = mHistoryData.get(parentList.get(groupPosition)).get(childPosition);
                     Intent intent = new Intent();
                     intent.putExtra("currentUri", hb.getHistoryURI());
-                    DaintyDBHelper.getDaintyDBHelper(getActivity()).deleteTableItem(DaintyDBHelper.TB_NAME,hb.getHistoryID()+"");
+                    DaintyDBHelper.getDaintyDBHelper(getActivity()).deleteTableItem(DaintyDBHelper.TB_NAME,"where historyID="+hb.getHistoryID());
                     getActivity().setResult(RESULT_OK, intent);
                     getActivity().finish();
                 }

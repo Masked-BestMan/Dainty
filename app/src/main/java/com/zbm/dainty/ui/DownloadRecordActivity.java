@@ -35,7 +35,6 @@ import android.widget.Toast;
 import com.zbm.dainty.adapter.DownloadRecordAdapter;
 import com.zbm.dainty.R;
 import com.zbm.dainty.bean.FileDownloadBean;
-import com.zbm.dainty.service.FileListenerService;
 import com.zbm.dainty.task.DownloaderTask;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.util.DownloadHelper;
@@ -93,12 +92,12 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     private int downloadingCount = 0;  //正在下载的文件数
     private Map<String, FileDownloadBean> pauseList = new LinkedHashMap<>();   //暂停任务列表
     private List<String> pauseListRemoveLog = new ArrayList();   //记录从pauseList移除的文件下载地址
-    private boolean flag=false;   //删除标志
+    //private boolean flag=false;   //删除标志
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startService(new Intent(this, FileListenerService.class));
+        //startService(new Intent(this, FileListenerService.class));
         setContentView(R.layout.activity_download_record);
         IntentFilter mFilter = new IntentFilter();
         mFilter.addAction("download_progress_refresh");
@@ -120,7 +119,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopService(new Intent(this,FileListenerService.class));
+        //stopService(new Intent(this,FileListenerService.class));
         unregisterReceiver(downloadStatus);
         if (timer != null) {
             timer.cancel();
@@ -288,7 +287,8 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                flag=true;
+                deleteWindow.dismiss();
+                //flag=true;
                 final FileDownloadBean selectedBean = data.get(selectedPosition);
                 //检查要删除的文件是否是暂停下载的
                 if (pauseList.containsKey(selectedBean.getDownloadUrl())) {
@@ -296,36 +296,45 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                             "where downloadUrl='"+selectedBean.getDownloadUrl()+"'");
                     pauseList.remove(selectedBean.getDownloadUrl());
                     pauseListRemoveLog.add(selectedBean.getDownloadUrl());
-
+                    new File(selectedBean.getFilePath()).delete();
+                    data.remove(selectedPosition);
+                    adapter.notifyDataSetChanged();
+                    refreshStorageStatus();
                 }else {
                     final DownloaderTask task = DownloadHelper.getDownloadFile(selectedBean.getFilePath());
+                    Log.d("Record","任务："+task);
                     if (task != null) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(DownloadRecordActivity.this);
-                        builder.setIcon(android.R.drawable.stat_sys_warning)
+                        builder.setIcon(android.R.drawable.ic_menu_info_details)
                                 .setTitle("删除提示")
                                 .setMessage("删除下载中的文件需要重新下载!")
                                 .setPositiveButton("仍要删除", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         task.cancel(true);
+                                        new File(selectedBean.getFilePath()).delete();
+                                        data.remove(selectedPosition);
+                                        adapter.notifyDataSetChanged();
+                                        refreshStorageStatus();
+                                        //flag=false;
                                     }
                                 })
-                                .setNegativeButton("继续下载", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        flag=false;
-                                    }
-                                });
-
+                                .setNegativeButton("继续下载", null);
+                        AlertDialog dialog=builder.create();
+                        dialog.show();
+                    }else {
+                        new File(selectedBean.getFilePath()).delete();
+                        data.remove(selectedPosition);
+                        adapter.notifyDataSetChanged();
+                        refreshStorageStatus();
                     }
                 }
-                if (flag) {
-                    new File(selectedBean.getFilePath()).delete();
-                    data.remove(selectedPosition);
-                    adapter.notifyDataSetChanged();
-                    refreshStorageStatus();
-                }
-                deleteWindow.dismiss();
+//                if (flag) {
+//                    new File(selectedBean.getFilePath()).delete();
+//                    data.remove(selectedPosition);
+//                    adapter.notifyDataSetChanged();
+//                    refreshStorageStatus();
+//                }
             }
         });
         deleteWindow = new PopupWindow(contentView, MyUtil.dip2px(this, 120),
