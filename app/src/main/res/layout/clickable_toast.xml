@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     xmlns:tool="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:background="@drawable/shape_corner">
     <TextView
         android:id="@+id/title_toast"
-        android:layout_width="0dp"
-        android:layout_weight="2"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:textColor="@android:color/white"
         android:gravity="center"
@@ -19,10 +18,9 @@
         tool:text="下载完成"/>
     <TextView
         android:id="@+id/button_toast"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:padding="10dp"
-        android:layout_weight="1"
-        android:layout_height="50dp"
         android:clickable="true"
         android:textSize="17sp"
         android:textColor="@android:color/holo_blue_dark"

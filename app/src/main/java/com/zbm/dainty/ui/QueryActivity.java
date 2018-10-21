@@ -65,8 +65,6 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
     ImageView clearButton;
     @BindView(R.id.query_history_list)
     QueryListView listView;
-    @BindView(R.id.cleanButton)
-    ImageView cleanHistoryButton;
     @BindView(R.id.query_bar_theme)
     View queryBarTheme;
 
@@ -79,9 +77,9 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
     private PopupWindow myPopupWindow;
     private int currentEngine = 1;
 
-    private static final int baidu = 1;
-    private static final int s360 = 2;
-    private static final int biying = 3;
+    private static final int BaiDu = 1;
+    private static final int S360 = 2;
+    private static final int BiYing = 3;
     private static final int REQUEST_RECOGNIZE = 100;
 
     @Override
@@ -116,6 +114,12 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
                 editText.setSelection(text.length());
             }
         });
+        adapter.setOnHeadClickListener(new QueryListAdapter.OnHeadClickListener() {
+            @Override
+            public void onClick() {
+                showNormalDialog();
+            }
+        });
         listView.setAdapter(adapter);
         queryEngine.setOnClickListener(this);
         voiceRecognition.setOnClickListener(this);
@@ -140,10 +144,10 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
                     clearButton.setVisibility(View.VISIBLE);
                 } else {
                     switch (currentEngine) {
-                        case baidu:
+                        case BaiDu:
                             queryEngine.setImageResource(R.drawable.baidu_icon);
                             break;
-                        case s360:
+                        case S360:
                             queryEngine.setImageResource(R.drawable.s360_icon);
                             break;
                         default:
@@ -164,10 +168,10 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
                 } else {
                     isURL = false;
                     switch (currentEngine) {
-                        case baidu:
+                        case BaiDu:
                             queryEngine.setImageResource(R.drawable.baidu_icon);
                             break;
-                        case s360:
+                        case S360:
                             queryEngine.setImageResource(R.drawable.s360_icon);
                             break;
                         default:
@@ -194,7 +198,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
 
                 if (mInputMethodManager.isActive())
                     mInputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-                QueryItemBean queryItemBean = data.get(i);
+                QueryItemBean queryItemBean = data.get(i-1);
                 insertOrUpdateTable(queryItemBean.getQueryNAME());
                 String value = queryItemBean.getQueryNAME();
                 Log.d("aaa","value:"+value);
@@ -204,10 +208,10 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
                     }
                 } else {
                     switch (currentEngine) {
-                        case baidu:
+                        case BaiDu:
                             value = "https://www.baidu.com/s?wd=" + value;
                             break;
-                        case s360:
+                        case S360:
                             value = "https://www.so.com/s?q=" + value;
                             break;
                         default:
@@ -240,23 +244,19 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
                 return false;
             }
         });
-
-        LayoutInflater lf = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        assert lf != null;
         @SuppressLint("InflateParams")
-        View contentView = lf.inflate(R.layout.query_item_delete_window, null);
+        View contentView = LayoutInflater.from(this).inflate(R.layout.query_item_delete_window, null);
         Button deleteButton = contentView.findViewById(R.id.deleteButton);
         deleteButton.setText("删除该条记录");
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 deleteWindow.dismiss();
-                DaintyDBHelper.getDaintyDBHelper(QueryActivity.this).deleteTableItem(DaintyDBHelper.QTB_NAME,"where queryNAME='"+data.get(selectedItem).getQueryNAME()+"'");
-                data.remove(selectedItem);
+                DaintyDBHelper.getDaintyDBHelper(QueryActivity.this).deleteTableItem(DaintyDBHelper.QTB_NAME,"where queryNAME='"+data.get(selectedItem-1).getQueryNAME()+"'");
+                data.remove(selectedItem-1);
                 adapter.notifyDataSetChanged();
             }
         });
-        cleanHistoryButton.setOnClickListener(this);
         deleteWindow = new PopupWindow(contentView, MyUtil.dip2px(this,120),
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         deleteWindow.setFocusable(true);
@@ -282,8 +282,6 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             case R.id.clear_text:
                 editText.setText("");
                 break;
-            case R.id.cleanButton:
-                showNormalDialog();
         }
     }
 
@@ -300,10 +298,10 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
                 }
             } else {
                 switch (currentEngine) {
-                    case baidu:
+                    case BaiDu:
                         value = "https://www.baidu.com/s?wd=" + editText.getText();
                         break;
-                    case s360:
+                    case S360:
                         value = "https://www.so.com/s?q=" + editText.getText();
                         break;
                     default:
@@ -370,7 +368,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onClick(View v) {
                 queryEngine.setImageResource(R.drawable.baidu_icon);
-                currentEngine = baidu;
+                currentEngine = BaiDu;
                 myPopupWindow.dismiss();
             }
         });
@@ -379,7 +377,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onClick(View v) {
                 queryEngine.setImageResource(R.drawable.s360_icon);
-                currentEngine = s360;
+                currentEngine = S360;
                 myPopupWindow.dismiss();
             }
         });
@@ -388,7 +386,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onClick(View v) {
                 queryEngine.setImageResource(R.drawable.biying_icon);
-                currentEngine = biying;
+                currentEngine = BiYing;
                 myPopupWindow.dismiss();
             }
         });

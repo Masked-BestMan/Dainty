@@ -23,6 +23,8 @@
     <string name="query_button_title1">搜索</string>
     <string name="query_button_title2">取消</string>
     <string name="query_delete_title">删除该条历史</string>
+    <string name="query_list_item_head_title">搜索记录</string>
+    <string name="query_list_item_head_button">删除</string>
     <string name="history_edit_title">编辑</string>
     <string name="setting_title">更多设置</string>
     <string name="login">账号登录</string>
