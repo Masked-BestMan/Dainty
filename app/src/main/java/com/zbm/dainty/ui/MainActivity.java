@@ -168,10 +168,10 @@ public class MainActivity extends AppCompatActivity{
         mFilter2.addAction("weather_refresh");
         registerReceiver(refresh, mFilter2);
 
-        setContentView(R.layout.activity_main);
-
         PreferenceManager.setDefaultValues(this, R.xml.pref_settings, true);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initView(savedInstanceState);
     }
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity{
             }
             initDot(count);
         } else {
-            String url = getIntent().getDataString();
+            String url = getIntent().getStringExtra("shortcut_url");
             Log.d("Main", "onCreate地址Path：" + url);
             WebViewFragment fragment = new WebViewFragment(null, initWebView(), url);
             WebPageHelper.webpagelist.add(fragment);
