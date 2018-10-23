@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -338,26 +337,14 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
          * @setMessage 设置对话框消息提示
          * setXXX方法返回Dialog对象，因此可以链式设置属性
          */
-        final AlertDialog.Builder normalDialog =
-                new AlertDialog.Builder(this);
-        normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
-                .setTitle("删除提示")
-                .setMessage("确认清空输入记录？")
-                .setPositiveButton("确定",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DaintyDBHelper.getDaintyDBHelper(QueryActivity.this).deleteTableItem(DaintyDBHelper.QTB_NAME,null);
-                                data.clear();
-                                adapter.notifyDataSetChanged();
-                            }
-                        })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                }).show();
+        MyUtil.createDialog(this,"删除提示","确认清空输入记录？","确定",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DaintyDBHelper.getDaintyDBHelper(QueryActivity.this).deleteTableItem(DaintyDBHelper.QTB_NAME,null);
+                data.clear();
+                adapter.notifyDataSetChanged();
+            }
+        },null);
     }
 
     private void initPopupWindow() {

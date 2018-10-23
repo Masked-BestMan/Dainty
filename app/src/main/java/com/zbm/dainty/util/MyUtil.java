@@ -2,8 +2,11 @@ package com.zbm.dainty.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Rect;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
+
 
 
 public class MyUtil {
@@ -45,6 +48,19 @@ public class MyUtil {
         context.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int usableHeight = metrics.heightPixels;
         return realHeight - usableHeight;
+    }
+
+    public static void createDialog(Context context, String title, String message, String positiveButtonText,
+                                    DialogInterface.OnClickListener onPositiveListener,
+                                    DialogInterface.OnClickListener onNegativeListener) {
+        AlertDialog.Builder normalDialog = new AlertDialog.Builder(context);
+        AlertDialog dialog=normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(positiveButtonText, onPositiveListener)
+                .setNegativeButton("取消", onNegativeListener).show();
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
     }
 
 }

@@ -15,7 +15,6 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
@@ -166,8 +165,8 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 } else {
                     final FileDownloadBean fileDownloadBean = data.get(position);
                     if (fileDownloadBean.isFinished()) {
-                        Intent intent=FileUtil.getFileIntent(new File(data.get(position).getFilePath()));
-                        intent.putExtra("file_path",data.get(position).getFilePath());
+                        Intent intent = FileUtil.getFileIntent(new File(data.get(position).getFilePath()));
+                        intent.putExtra("file_path", data.get(position).getFilePath());
                         startActivity(intent);
 
                     } else {
@@ -244,27 +243,22 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         emptyRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder normalDialog =
-                        new AlertDialog.Builder(DownloadRecordActivity.this);
-                normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
-                        .setTitle("删除提示")
-                        .setMessage("清空后需要重新下载文件!")
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        DaintyDBHelper.getDaintyDBHelper(DownloadRecordActivity.this).deleteTableItem(DaintyDBHelper.DTB_NAME, null);
-                                        DownloadHelper.stopAllDownloads();
-                                        File savePath = new File("/storage/emulated/0/DaintyDownloads");
-                                        if (savePath.exists()) {
-                                            for (File file : savePath.listFiles()) {
-                                                file.delete();
-                                            }
-                                            initData();
-                                        }
+                MyUtil.createDialog(DownloadRecordActivity.this, "删除提示",
+                        "清空后需要重新下载文件!", "确定"
+                        , new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                DaintyDBHelper.getDaintyDBHelper(DownloadRecordActivity.this).deleteTableItem(DaintyDBHelper.DTB_NAME, null);
+                                DownloadHelper.stopAllDownloads();
+                                File savePath = new File("/storage/emulated/0/DaintyDownloads");
+                                if (savePath.exists()) {
+                                    for (File file : savePath.listFiles()) {
+                                        file.delete();
                                     }
-                                })
-                        .setNegativeButton("取消", null).show();
+                                    initData();
+                                }
+                            }
+                        }, null);
             }
         });
         @SuppressLint("InflateParams")
@@ -293,36 +287,29 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                 //检查要删除的文件是否是暂停下载的
                 if (pauseList.containsKey(selectedBean.getDownloadUrl())) {
                     DaintyDBHelper.getDaintyDBHelper(DownloadRecordActivity.this).deleteTableItem(DaintyDBHelper.DTB_NAME,
-                            "where downloadUrl='"+selectedBean.getDownloadUrl()+"'");
+                            "where downloadUrl='" + selectedBean.getDownloadUrl() + "'");
                     pauseList.remove(selectedBean.getDownloadUrl());
                     pauseListRemoveLog.add(selectedBean.getDownloadUrl());
                     new File(selectedBean.getFilePath()).delete();
                     data.remove(selectedPosition);
                     adapter.notifyDataSetChanged();
                     refreshStorageStatus();
-                }else {
+                } else {
                     final DownloaderTask task = DownloadHelper.getDownloadFile(selectedBean.getFilePath());
-                    Log.d("Record","任务："+task);
+                    Log.d("Record", "任务：" + task);
                     if (task != null) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(DownloadRecordActivity.this);
-                        builder.setIcon(android.R.drawable.ic_menu_info_details)
-                                .setTitle("删除提示")
-                                .setMessage("删除下载中的文件需要重新下载!")
-                                .setPositiveButton("仍要删除", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        task.cancel(true);
-                                        new File(selectedBean.getFilePath()).delete();
-                                        data.remove(selectedPosition);
-                                        adapter.notifyDataSetChanged();
-                                        refreshStorageStatus();
-                                        //flag=false;
-                                    }
-                                })
-                                .setNegativeButton("继续下载", null);
-                        AlertDialog dialog=builder.create();
-                        dialog.show();
-                    }else {
+                        MyUtil.createDialog(DownloadRecordActivity.this,"删除提示","删除下载中的文件需要重新下载!","仍要删除",new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                task.cancel(true);
+                                new File(selectedBean.getFilePath()).delete();
+                                data.remove(selectedPosition);
+                                adapter.notifyDataSetChanged();
+                                refreshStorageStatus();
+                                //flag=false;
+                            }
+                        },null);
+                    } else {
                         new File(selectedBean.getFilePath()).delete();
                         data.remove(selectedPosition);
                         adapter.notifyDataSetChanged();
@@ -345,12 +332,12 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         confirmDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("rer","选中："+selectedItemList+"data size："+data.size());
-                for (int i:selectedItemList) {
-                    FileDownloadBean selectedBean=data.get(i);
+                Log.d("rer", "选中：" + selectedItemList + "data size：" + data.size());
+                for (int i : selectedItemList) {
+                    FileDownloadBean selectedBean = data.get(i);
                     if (pauseList.containsKey(selectedBean.getDownloadUrl())) {
                         DaintyDBHelper.getDaintyDBHelper(DownloadRecordActivity.this).deleteTableItem(DaintyDBHelper.DTB_NAME,
-                                "where downloadUrl='"+selectedBean.getDownloadUrl()+"'");
+                                "where downloadUrl='" + selectedBean.getDownloadUrl() + "'");
                         pauseList.remove(selectedBean.getDownloadUrl());
                         pauseListRemoveLog.add(selectedBean.getDownloadUrl());
 
@@ -363,9 +350,9 @@ public class DownloadRecordActivity extends SwipeBackActivity {
                     pauseListRemoveLog.add(selectedBean.getDownloadUrl());
                     pauseList.remove(selectedBean.getDownloadUrl());
                 }
-                int removeNum=-1;
-                for (int i:selectedItemList){
-                    data.remove((i-(removeNum+1)));
+                int removeNum = -1;
+                for (int i : selectedItemList) {
+                    data.remove((i - (removeNum + 1)));
                     removeNum++;
                 }
                 adapter.setRestoreCheckBox(true);
@@ -396,47 +383,48 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         pauseListRemoveLog.clear();
 
         DaintyDBHelper.getDaintyDBHelper(this).searchDownloadTable("select * from "
-                + DaintyDBHelper.DTB_NAME + " order by downloadTIME desc",
+                        + DaintyDBHelper.DTB_NAME + " order by downloadTIME desc",
                 new DaintyDBHelper.OnSearchDownloadTableListener() {
-            @Override
-            public void onResult(ArrayList<FileDownloadBean> mDownloadData) {
-                Log.d("download", "数据库：" + mDownloadData.size());
-                for (FileDownloadBean bean : mDownloadData)
-                    pauseList.put(bean.getDownloadUrl(), bean);
-                data.addAll(mDownloadData);
-                File savePath = new File("/storage/emulated/0/DaintyDownloads");
-                if (savePath.exists()) {
-                    files = savePath.listFiles();
-                    if (files != null) {
-                        for (File file : files) {
-                            if (file.isDirectory())continue;
-                            if (data.contains(new FileDownloadBean(file.getName()))) continue;
-                            FileDownloadBean fileInfo = new FileDownloadBean(file.getName());
-                            DownloaderTask task = DownloadHelper.getDownloadFile(file.getAbsolutePath());
-                            if (task != null) {
-                                fileInfo.setDownloading(true);
-                                fileInfo.setFinished(false);
-                                fileInfo.setLastModified(task.getTime());
-                                fileInfo.setDownloadProgress(task.getProgress());
-                                fileInfo.setFileSize(task.getFileSize());
-                                fileInfo.setDownloadUrl(task.getDownloadUrl());
-                            } else {
-                                fileInfo.setDownloading(false);
-                                fileInfo.setFinished(true);
-                                fileInfo.setLastModified(file.lastModified());
-                                fileInfo.setFileSize((int) file.length());
-                            }
-                            fileInfo.setFilePath(file.getAbsolutePath());
-                            data.add(fileInfo);
-                        }
+                    @Override
+                    public void onResult(ArrayList<FileDownloadBean> mDownloadData) {
+                        Log.d("download", "数据库：" + mDownloadData.size());
+                        for (FileDownloadBean bean : mDownloadData)
+                            pauseList.put(bean.getDownloadUrl(), bean);
+                        data.addAll(mDownloadData);
+                        File savePath = new File("/storage/emulated/0/DaintyDownloads");
+                        if (savePath.exists()) {
+                            files = savePath.listFiles();
+                            if (files != null) {
+                                for (File file : files) {
+                                    if (file.isDirectory()) continue;
+                                    if (data.contains(new FileDownloadBean(file.getName())))
+                                        continue;
+                                    FileDownloadBean fileInfo = new FileDownloadBean(file.getName());
+                                    DownloaderTask task = DownloadHelper.getDownloadFile(file.getAbsolutePath());
+                                    if (task != null) {
+                                        fileInfo.setDownloading(true);
+                                        fileInfo.setFinished(false);
+                                        fileInfo.setLastModified(task.getTime());
+                                        fileInfo.setDownloadProgress(task.getProgress());
+                                        fileInfo.setFileSize(task.getFileSize());
+                                        fileInfo.setDownloadUrl(task.getDownloadUrl());
+                                    } else {
+                                        fileInfo.setDownloading(false);
+                                        fileInfo.setFinished(true);
+                                        fileInfo.setLastModified(file.lastModified());
+                                        fileInfo.setFileSize((int) file.length());
+                                    }
+                                    fileInfo.setFilePath(file.getAbsolutePath());
+                                    data.add(fileInfo);
+                                }
 
+                            }
+                            Collections.sort(data);
+                            if (adapter != null)
+                                adapter.notifyDataSetChanged();
+                        }
                     }
-                    Collections.sort(data);
-                    if (adapter != null)
-                        adapter.notifyDataSetChanged();
-                }
-            }
-        });
+                });
 
         refreshStorageStatus();
     }
@@ -448,7 +436,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
             int downloadItemInList = 0;
             final int childIndex = downloadRecordList.getFirstVisiblePosition();
             for (int i = downloadRecordList.getFirstVisiblePosition(); i <= downloadRecordList.getLastVisiblePosition(); i++) {
-                if (i>=data.size())return;
+                if (i >= data.size()) return;
                 if (data.get(i).isDownloading()) {
                     downloadItemInList++;
                     if (downloadItemInList > downloadingCount) break;
@@ -479,7 +467,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         }
     }
 
-    private void refreshStorageStatus(){
+    private void refreshStorageStatus() {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getPath());
             long blockSize = statFs.getBlockSizeLong();
@@ -488,10 +476,11 @@ public class DownloadRecordActivity extends SwipeBackActivity {
             String totalSize = Formatter.formatFileSize(this, blockSize * totalBlocks);
             String availableSize = Formatter.formatFileSize(this, blockSize * availableBlocks);
             textProgressBar.setTextAndProgress("内置存储可用：" + availableSize + "/共：" + totalSize, (int) ((float) availableBlocks / totalBlocks * 100));
-        }else {
-            textProgressBar.setTextAndProgress("内置存储不可用",0);
+        } else {
+            textProgressBar.setTextAndProgress("内置存储不可用", 0);
         }
     }
+
     /*
     每隔一秒发送一次广播
      */

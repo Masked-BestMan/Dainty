@@ -23,7 +23,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -75,7 +74,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.home_button)
     ImageView homeButton;
@@ -267,11 +266,11 @@ public class MainActivity extends AppCompatActivity{
 
             }
         }
-        Log.d("rer",toApplyList.size()+"个");
+        Log.d("rer", toApplyList.size() + "个");
         String tmpList[] = new String[toApplyList.size()];
         if (!toApplyList.isEmpty()) {
             ActivityCompat.requestPermissions(this, toApplyList.toArray(tmpList), 121);
-        }else {
+        } else {
             startService(new Intent(this, WeatherService.class));
         }
 
@@ -653,6 +652,7 @@ public class MainActivity extends AppCompatActivity{
         };
     }
 
+    @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event) {
         //删除动画
@@ -790,56 +790,44 @@ public class MainActivity extends AppCompatActivity{
             Log.d("rer", "isGrant:" + isAllGranted);
             if (!isAllGranted) {
                 // 如果用户拒绝授权，则弹出对话框让用户自行设置
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("警告");
-                builder.setMessage("当前应用缺少必要权限，请点击“设置”开启权限或点击“取消”关闭应用。");
-                builder.setPositiveButton("设置", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.setData(Uri.fromParts("package", MainActivity.this.getPackageName(), null));
-                        MainActivity.this.startActivity(intent);
-                    }
-                }).
-                        setNegativeButton("取消", new DialogInterface.OnClickListener() {
-
+                MyUtil.createDialog(MainActivity.this, "警告",
+                        "当前应用缺少必要权限，请点击“设置”开启权限或点击“取消”关闭应用。",
+                        "设置", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.setData(Uri.fromParts("package", MainActivity.this.getPackageName(), null));
+                                MainActivity.this.startActivity(intent);
+                            }
+                        }, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 // TODO Auto-generated method stub
                                 MainActivity.this.finish();
                             }
                         });
-
-                AlertDialog dialog = builder.show();
-                dialog.setCancelable(false);
-                dialog.setCanceledOnTouchOutside(false);
-            }else
+            } else
                 startService(new Intent(this, WeatherService.class));
         }
     }
 
     private void checkDownloadTask() {
         if (DownloadHelper.downloadList.size() > 0) {
-            AlertDialog.Builder normalDialog =
-                    new AlertDialog.Builder(this);
-            normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
-                    .setTitle("退出提示")
-                    .setMessage("有下载任务正在进行，退出浏览器将删除临时下载文件，仍要退出？")
-                    .setPositiveButton("确定",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    for (DownloaderTask task : DownloadHelper.downloadList) {
-                                        task.cancel(true);
-                                        new File(task.getFilePath()).delete();
-                                    }
-                                    DownloadHelper.downloadList.clear();
-                                    MainActivity.super.onBackPressed();
-                                }
-                            })
-                    .setNegativeButton("取消", null).show();
+            MyUtil.createDialog(this, "退出提示",
+                    "有下载任务正在进行，退出浏览器将删除临时下载文件，仍要退出？",
+                    "确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            for (DownloaderTask task : DownloadHelper.downloadList) {
+                                task.cancel(true);
+                                //noinspection ResultOfMethodCallIgnored
+                                new File(task.getFilePath()).delete();
+                            }
+                            DownloadHelper.downloadList.clear();
+                            MainActivity.super.onBackPressed();
+                        }
+                    }, null);
         } else {
             super.onBackPressed();
         }

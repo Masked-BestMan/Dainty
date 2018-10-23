@@ -7,7 +7,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -230,24 +229,12 @@ public class HistoryFragment extends Fragment {
          * @setMessage 设置对话框消息提示
          * setXXX方法返回Dialog对象，因此可以链式设置属性
          */
-        final AlertDialog.Builder normalDialog =
-                new AlertDialog.Builder(getActivity());
-        normalDialog.setIcon(android.R.drawable.ic_menu_info_details)
-                .setTitle("删除提示")
-                .setMessage("确认清空输入历史？")
-                .setPositiveButton("确定",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DaintyDBHelper.getDaintyDBHelper(getActivity()).deleteTableItem(DaintyDBHelper.TB_NAME,null);
-                                getHistory();
-                            }
-                        })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                }).show();
+        MyUtil.createDialog(getActivity(),"删除提示","确认清空输入历史？","确定",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DaintyDBHelper.getDaintyDBHelper(getActivity()).deleteTableItem(DaintyDBHelper.TB_NAME,null);
+                getHistory();
+            }
+        },null);
     }
 }

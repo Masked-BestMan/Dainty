@@ -237,6 +237,7 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
 
     private void blockAds(WebView view) {
         String tags = view.getUrl();
+        //noinspection MismatchedQueryAndUpdateOfStringBuilder
         StringBuilder sb = new StringBuilder();
         sb.append("javascript: ");
         String[] allTag = tags.split(",");
