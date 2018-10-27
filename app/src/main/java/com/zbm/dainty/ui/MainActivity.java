@@ -50,7 +50,6 @@ import com.zbm.dainty.task.ImageTask;
 import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.CircleImageView;
-import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.adapter.MenuListAdapter;
 import com.zbm.dainty.bean.MessageEvent;
 import com.zbm.dainty.R;
@@ -562,14 +561,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Dainty", "调用getView:" + MainActivity.this.webView);
             }
 
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                //会加载几次
-                if (!title.equals("") && !title.contains("https") && !title.contains("http")) {
-                    insertTable(view.getUrl(), title);
-                    Log.d("web_view", title + " " + view.getUrl());
-                }
-            }
+//            @Override
+//            public void onReceivedTitle(WebView view, String title) {
+//                //会加载几次
+//                if (!title.equals("") && !title.contains("https") && !title.contains("http")) {
+//                    insertTable(view.getUrl(), title);
+//                    Log.d("web_view", title + " " + view.getUrl());
+//                }
+//            }
 
 
             @Override
@@ -719,9 +718,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void insertTable(final String url, final String title) {
-        DaintyDBHelper.getDaintyDBHelper(this).updateHistoryTable(url, title);
-    }
+//    private void insertTable(final String url, final String title) {
+//        DaintyDBHelper.getDaintyDBHelper(this).updateHistoryTable(url, title);
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -746,7 +745,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver networkChange = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager connectivityManager = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             assert connectivityManager != null;
             NetworkInfo info = connectivityManager.getActiveNetworkInfo();
             if (info != null && info.isAvailable()) {
