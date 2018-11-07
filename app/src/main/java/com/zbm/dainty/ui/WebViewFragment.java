@@ -29,6 +29,7 @@ import com.zbm.dainty.DaintyApplication;
 import com.zbm.dainty.R;
 import com.zbm.dainty.adapter.PopupMenuListAdapter;
 import com.zbm.dainty.task.ResolveDownloadUrlTask;
+import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.MingWebView;
 
@@ -90,7 +91,11 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
             webView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public void onReceivedTitle(WebView view, String title) {
-                    if (wl != null) wl.onReceivedTitle(view, title);
+                    //if (wl != null) wl.onReceivedTitle(view, title);
+                    if (!title.equals("") && !title.contains("https") && !title.contains("http")) {
+                        DaintyDBHelper.getDaintyDBHelper(getActivity()).updateHistoryTable(view.getUrl(), title);
+                        Log.d("web_view", title + " " + view.getUrl());
+                    }
                     super.onReceivedTitle(view, title);
                 }
 
@@ -272,7 +277,7 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
     public interface OnWebViewListener {
         void onGetWebView(MingWebView webView);
 
-        void onReceivedTitle(WebView view, String title);
+        //void onReceivedTitle(WebView view, String title);
 
         void onPageStarted(WebView view, String url, Bitmap favicon);
 
