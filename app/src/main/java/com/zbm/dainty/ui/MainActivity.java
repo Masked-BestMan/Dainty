@@ -49,7 +49,6 @@ import com.zbm.dainty.task.DownloaderTask;
 import com.zbm.dainty.task.ImageTask;
 import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
-import com.zbm.dainty.widget.CircleImageView;
 import com.zbm.dainty.adapter.MenuListAdapter;
 import com.zbm.dainty.bean.MessageEvent;
 import com.zbm.dainty.R;
@@ -99,8 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-    @BindView(R.id.head_portrait)
-    CircleImageView headPortraitView;
+//    @BindView(R.id.head_portrait)
+//    CircleImageView headPortraitView;
+    @BindView(R.id.tv_username)
+    TextView tvUserName;
     @BindView(R.id.progress_bar)
     ProgressBar progressBar;
     @BindView(R.id.weather)
@@ -348,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDrawerClosed(View drawerView) {
                 switch (selectMenuPosition) {
                     case -1:
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class),2);
                         break;
                     case 0:
                         webView.loadUrl("http://dushu.m.baidu.com");
@@ -420,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick({R.id.menu_button, R.id.query_button, R.id.web_back, R.id.web_next,
             R.id.web_freshen, R.id.web_stop_loading, R.id.web_multi, R.id.add_web_page,
-            R.id.home_button, R.id.exit_button, R.id.head_portrait})
+            R.id.home_button, R.id.exit_button, R.id.tv_username})
     public void onClick(View view) {
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) mDrawerLayout.closeDrawers();
         int object = view.getId();
@@ -465,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.exit_button:
                 checkDownloadTask();
                 break;
-            case R.id.head_portrait:
+            case R.id.tv_username:
                 selectMenuPosition = -1;
                 break;
             default:
@@ -736,7 +737,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case 2:
                 if (resultCode == RESULT_OK) {
-                    headPortraitView.setImageBitmap((Bitmap) data.getParcelableExtra("touxiang"));
+                    tvUserName.setText(data.getStringExtra("username"));
                 }
                 break;
         }

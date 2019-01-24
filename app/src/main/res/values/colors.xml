@@ -14,5 +14,5 @@
     <color name="tab_default">#AAB7AF</color>
     <color name="text_color_black">#000000</color>
     <color name="text_color_deep_gray">#5B5B5B</color>
-    <color name="text_color_light_gray">#AAAAAA</color>
+    <color name="text_color_light_gray">#aaaaaa</color>
 </resources>

@@ -92,6 +92,9 @@
             android:name=".ui.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TransparentActivity" />
+        <activity android:name=".ui.RegisterActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.TransparentActivity"/>
 
         <service android:name=".util.WeatherService" />
         <service
