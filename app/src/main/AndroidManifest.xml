@@ -54,7 +54,7 @@
             android:value="1hoZW66icR3oexRFbpX9mvosdIr4mkzO"/>
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".main.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -89,19 +89,19 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TransparentActivity" />
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".login.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TransparentActivity" />
-        <activity android:name=".ui.RegisterActivity"
+        <activity android:name=".login.RegisterActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TransparentActivity"/>
 
-        <service android:name=".util.WeatherService" />
+        <service android:name=".main.WeatherService" />
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote" />
-        <service android:name=".service.FileListenerService"/>
+
         <activity
             android:name=".ui.RecognizeActivity"
             android:screenOrientation="portrait"
@@ -117,7 +117,7 @@
             android:theme="@style/AppTheme.TransparentActivity"/>
 
         <activity
-            android:name=".ui.DecompressionActivity"
+            android:name=".decompression.DecompressionActivity"
             android:icon="@mipmap/decompression_manager"
             android:label="@string/decompression_manager_title"
             android:launchMode="singleTask"

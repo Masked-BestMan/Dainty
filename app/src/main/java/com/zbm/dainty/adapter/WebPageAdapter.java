@@ -3,7 +3,7 @@ package com.zbm.dainty.adapter;
 import android.support.v4.app.FragmentManager;
 
 import com.zbm.dainty.util.WebPageHelper;
-import com.zbm.dainty.ui.WebViewFragment;
+import com.zbm.dainty.main.WebViewFragment;
 
 /**
  * Created by Zbm阿铭 on 2017/11/2.

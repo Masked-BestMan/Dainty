@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.widget.AdapterView;
@@ -40,6 +41,7 @@ import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.bean.QueryItemBean;
 import com.zbm.dainty.adapter.QueryListAdapter;
 import com.zbm.dainty.R;
+import com.zbm.dainty.util.PopupAgent;
 import com.zbm.dainty.widget.QueryListView;
 
 import java.util.ArrayList;
@@ -73,7 +75,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
     private QueryListAdapter adapter;
     private PopupWindow deleteWindow;
     private int selectedItem;
-    private PopupWindow myPopupWindow;
+    private PopupAgent popupAgent;
     private int currentEngine = 1;
 
     private static final int BaiDu = 1;
@@ -270,7 +272,11 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
         int object = view.getId();
         switch (object) {
             case R.id.query_engine:
-                myPopupWindow.showAsDropDown(queryBarTheme);
+                if (popupAgent.isShowing()){
+                    popupAgent.dismiss();
+                }else {
+                    popupAgent.show();
+                }
                 break;
             case R.id.voice_recognition:
                 startActivityForResult(new Intent(this, RecognizeActivity.class), REQUEST_RECOGNIZE);
@@ -350,13 +356,21 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
     private void initPopupWindow() {
         @SuppressLint("InflateParams")
         View popupLayout = LayoutInflater.from(this).inflate(R.layout.popup_query, null);
+        popupAgent=new PopupAgent.Builder(this)
+                .setPopupWindow(popupLayout)
+                .setPopupContent(popupLayout.findViewById(R.id.popup_content))
+                .setPopupDark(popupLayout.findViewById(R.id.popup_dark))
+                .setInAnimation(AnimationUtils.loadAnimation(this,R.anim.query_engine_window_enter))
+                .setOutAnimation(AnimationUtils.loadAnimation(this,R.anim.query_engine_window_exit))
+                .setMargins(0,MyUtil.dip2px(this,75),0,0)
+                .build();
         TextView duEngine = popupLayout.findViewById(R.id.baidu_engine);
         duEngine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 queryEngine.setImageResource(R.drawable.baidu_icon);
                 currentEngine = BaiDu;
-                myPopupWindow.dismiss();
+                popupAgent.dismiss();
             }
         });
         TextView sEngine = popupLayout.findViewById(R.id.s360_engine);
@@ -365,7 +379,7 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             public void onClick(View v) {
                 queryEngine.setImageResource(R.drawable.s360_icon);
                 currentEngine = S360;
-                myPopupWindow.dismiss();
+                popupAgent.dismiss();
             }
         });
         TextView yingEngine = popupLayout.findViewById(R.id.biying_engine);
@@ -374,16 +388,9 @@ public class QueryActivity extends AppCompatActivity implements View.OnClickList
             public void onClick(View v) {
                 queryEngine.setImageResource(R.drawable.biying_icon);
                 currentEngine = BiYing;
-                myPopupWindow.dismiss();
+                popupAgent.dismiss();
             }
         });
-        myPopupWindow = new PopupWindow(popupLayout, WindowManager.LayoutParams.MATCH_PARENT,
-                MyUtil.dip2px(this, 100));
-        myPopupWindow.setFocusable(true);
-        myPopupWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
-        myPopupWindow.setAnimationStyle(R.style.query_popup_animation);
-        myPopupWindow.setOutsideTouchable(true);
-
     }
 
     @Override

@@ -1,8 +1,6 @@
 package com.zbm.dainty.ui;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -90,7 +88,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     private File[] files;    //下载目录内的文件
     private int downloadingCount = 0;  //正在下载的文件数
     private Map<String, FileDownloadBean> pauseList = new LinkedHashMap<>();   //暂停任务列表
-    private List<String> pauseListRemoveLog = new ArrayList();   //记录从pauseList移除的文件下载地址
+    private List<String> pauseListRemoveLog = new ArrayList<>();   //记录从pauseList移除的文件下载地址
     //private boolean flag=false;   //删除标志
 
     @Override
@@ -98,9 +96,9 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         super.onCreate(savedInstanceState);
         //startService(new Intent(this, FileListenerService.class));
         setContentView(R.layout.activity_download_record);
-        IntentFilter mFilter = new IntentFilter();
-        mFilter.addAction("download_progress_refresh");
-        registerReceiver(downloadStatus, mFilter);
+//        IntentFilter mFilter = new IntentFilter();
+//        mFilter.addAction("download_progress_refresh");
+        //LocalBroadcastManager.getInstance(this).registerReceiver(downloadStatus, mFilter);
 
         ButterKnife.bind(this);
         initData();
@@ -119,7 +117,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     protected void onDestroy() {
         super.onDestroy();
         //stopService(new Intent(this,FileListenerService.class));
-        unregisterReceiver(downloadStatus);
+        //LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadStatus);
         if (timer != null) {
             timer.cancel();
         }
@@ -481,17 +479,17 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         }
     }
 
-    /*
-    每隔一秒发送一次广播
-     */
-    private BroadcastReceiver downloadStatus = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getBooleanExtra("finish_download", false)) {
-                initData();
-            }
-        }
-    };
+//    /*
+//    每隔一秒发送一次广播
+//     */
+//    private BroadcastReceiver downloadStatus = new BroadcastReceiver() {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if (intent.getBooleanExtra("finish_download", false)) {
+//                initData();
+//            }
+//        }
+//    };
 
 }

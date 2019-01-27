@@ -98,7 +98,7 @@
             android:layout_marginEnd="20dp"
             android:textColor="#1c86ee"
             android:textSize="32sp"
-            tool:text="60°" />
+            android:text="N/A" />
 
         <TextView
             android:id="@+id/current_city"

@@ -1,38 +1,43 @@
-package com.zbm.dainty.util;
+package com.zbm.dainty.main;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-
-import org.json.JSONObject;
+import com.zbm.dainty.bean.WeatherInfoBean;
 
 /**
  * Created by Zbm阿铭 on 2017/5/1.
  */
 
-public class WeatherService extends Service {
-    private String city="";
+public class WeatherService extends Service implements MainContract.View {
+    private String city = "";
     private LocationClient mLocationClient = null;
+    private MainPresenter presenter;
 
     @Override
-    public int onStartCommand(Intent intent,int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
+        presenter = new MainPresenter(this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         mLocationClient = new LocationClient(getApplicationContext());
         MyLocationListener myListener = new MyLocationListener();
         initLocation();
         mLocationClient.registerLocationListener(myListener);
-        SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(this);
-        city=sharedPreferences.getString("cityName","");
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        city = sharedPreferences.getString("cityName", "");
 
         mLocationClient.start();
         return super.onStartCommand(intent, flags, startId);
@@ -49,7 +54,8 @@ public class WeatherService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
-    private void initLocation(){
+
+    private void initLocation() {
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Battery_Saving);
         //可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
@@ -83,50 +89,37 @@ public class WeatherService extends Service {
 
         mLocationClient.setLocOption(option);
     }
+
+    @Override
+    public void showWeatherInfo(WeatherInfoBean weatherInfoBean) {
+        Intent intent = new Intent("weather_refresh");
+        intent.putExtra("content", weatherInfoBean);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    @Override
+    public void showToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
     private class MyLocationListener extends BDAbstractLocationListener {
 
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
-            if(bdLocation.getLocType()==63)
-                Toast.makeText(WeatherService.this,"请检查网络",Toast.LENGTH_SHORT).show();
-            else{
-                city=bdLocation.getDistrict();   //具体到区县的定位
-                SharedPreferences.Editor pref= PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                pref.putString("cityName",city);
+            if (bdLocation.getLocType() == 63)
+                Toast.makeText(WeatherService.this, "请检查网络", Toast.LENGTH_SHORT).show();
+            else {
+                city = bdLocation.getDistrict();   //具体到区县的定位
+                SharedPreferences.Editor pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                pref.putString("cityName", city);
                 pref.apply();
 
-                if(city!=null){
-                    HttpUtil.sendHttpRequest("http://wthrcdn.etouch.cn/weather_mini?city=" + city, new HttpUtil.HttpCallbackListener() {
-                        @Override
-                        public void onFinish(String response) {
-                            handleWeatherResponse(WeatherService.this,response);
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-
-                        }
-                    });
+                if (city != null) {
+                    presenter.getWeatherInfo(city);
                 }
 
             }
             WeatherService.this.stopSelf();
-        }
-    }
-    private void handleWeatherResponse(Context context, String response){
-        try {
-            Log.d("ttt",response);
-            JSONObject jsonObject=new JSONObject(response);
-            JSONObject weatherInfo=jsonObject.getJSONObject("data");
-            String temperature=weatherInfo.getString("wendu");
-            String climate=weatherInfo.getString("ganmao");
-            SharedPreferences.Editor pref= PreferenceManager.getDefaultSharedPreferences(context).edit();
-            pref.putString("wendu",temperature+"°");
-            pref.putString("ganmao",climate);
-            pref.apply();
-            context.getApplicationContext().sendBroadcast(new Intent("weather_refresh"));
-        }catch (Exception e){
-            e.printStackTrace();
         }
     }
 }

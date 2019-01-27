@@ -1,4 +1,4 @@
-package com.zbm.dainty.ui;
+package com.zbm.dainty.main;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -45,14 +46,20 @@ import android.widget.Toast;
 
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
+import com.zbm.dainty.bean.WeatherInfoBean;
+import com.zbm.dainty.login.LoginActivity;
 import com.zbm.dainty.task.DownloaderTask;
 import com.zbm.dainty.task.ImageTask;
+import com.zbm.dainty.ui.CollectionEditActivity;
+import com.zbm.dainty.ui.ConfigActivity;
+import com.zbm.dainty.ui.DownloadRecordActivity;
+import com.zbm.dainty.ui.HistoryAndLabelActivity;
+import com.zbm.dainty.ui.QueryActivity;
 import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.adapter.MenuListAdapter;
 import com.zbm.dainty.bean.MessageEvent;
 import com.zbm.dainty.R;
-import com.zbm.dainty.util.WeatherService;
 import com.zbm.dainty.util.WebPageHelper;
 import com.zbm.dainty.adapter.WebPageAdapter;
 import com.zbm.dainty.widget.MingWebView;
@@ -142,8 +149,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.AppTheme_TransparentActivity);
-        //getWindow().setFormat(PixelFormat.TRANSLUCENT);
-        //getWindow().setBackgroundDrawable(null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -165,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         //天气结果广播监听
         IntentFilter mFilter2 = new IntentFilter();
         mFilter2.addAction("weather_refresh");
-        registerReceiver(refresh, mFilter2);
+        LocalBroadcastManager.getInstance(this).registerReceiver(refresh, mFilter2);
 
         PreferenceManager.setDefaultValues(this, R.xml.pref_settings, true);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -188,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        now_temperature.setText(preferences.getString("wendu", "N/A"));
         city.setText(preferences.getString("cityName", "未知城市"));
         if (webView != null) {
             webView.getSettings().setTextZoom(Integer.valueOf(preferences.getString("text_size", "100")));
@@ -247,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         WebPageHelper.webpagelist.clear();
         unregisterReceiver(networkChange);
-        unregisterReceiver(refresh);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(refresh);
     }
 
     private void initPermission() {
@@ -266,7 +270,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-        Log.d("rer", toApplyList.size() + "个");
         String tmpList[] = new String[toApplyList.size()];
         if (!toApplyList.isEmpty()) {
             ActivityCompat.requestPermissions(this, toApplyList.toArray(tmpList), 121);
@@ -408,7 +411,6 @@ public class MainActivity extends AppCompatActivity {
             //添加到LinearLayout
             indicator.addView(view, layoutParams);
         }
-        Log.d("WP", "当前页：" + mViewPager.getCurrentItem());
         indicator.getChildAt(mViewPager.getCurrentItem()).setEnabled(true);
         firstPosition = mViewPager.getCurrentItem();
     }
@@ -555,22 +557,11 @@ public class MainActivity extends AppCompatActivity {
                 webView.setOnScrollChangedCallback(new MingWebView.OnScrollChangedCallback() {
                     @Override
                     public void onScroll(int dx, int dy) {
-                        Log.d("ttt", "dy:" + dy);
                         webLayout.scrollBy(0, dy);
                     }
                 });
                 Log.d("Dainty", "调用getView:" + MainActivity.this.webView);
             }
-
-//            @Override
-//            public void onReceivedTitle(WebView view, String title) {
-//                //会加载几次
-//                if (!title.equals("") && !title.contains("https") && !title.contains("http")) {
-//                    insertTable(view.getUrl(), title);
-//                    Log.d("web_view", title + " " + view.getUrl());
-//                }
-//            }
-
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -639,8 +630,6 @@ public class MainActivity extends AppCompatActivity {
                             webpageAdapter.notifyDataSetChanged();
                             initDot(WebPageHelper.webpagelist.size());
                         }
-                        break;
-                    case WebViewFragment.FREE_REPLICATION:
                         break;
                     case WebViewFragment.COPY_LINK:
                         break;
@@ -719,10 +708,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void insertTable(final String url, final String title) {
-//        DaintyDBHelper.getDaintyDBHelper(this).updateHistoryTable(url, title);
-//    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -766,9 +751,9 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         @Override
         public void onReceive(Context context, Intent intent) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            now_temperature.setText(preferences.getString("wendu", ""));
-            city.setText(preferences.getString("cityName", " "));
+            WeatherInfoBean bean= (WeatherInfoBean) intent.getSerializableExtra("content");
+            now_temperature.setText(bean.getTemperature());
+            city.setText(bean.getClimate());
         }
     };
 
@@ -777,17 +762,14 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 121) {
             boolean isAllGranted = true;
-            Log.d("rer", "调用onRequestPermissionsResult");
             // 判断是否所有的权限都已经授予了
             for (int grant : grantResults) {
                 if (grant != PackageManager.PERMISSION_GRANTED) {
                     isAllGranted = false;
                     break;
                 }
-                Log.d("rer", "grant:" + grant);
 
             }
-            Log.d("rer", "isGrant:" + isAllGranted);
             if (!isAllGranted) {
                 // 如果用户拒绝授权，则弹出对话框让用户自行设置
                 MyUtil.createDialog(MainActivity.this, "警告",
@@ -807,8 +789,9 @@ public class MainActivity extends AppCompatActivity {
                                 MainActivity.this.finish();
                             }
                         });
-            } else
+            } else {
                 startService(new Intent(this, WeatherService.class));
+            }
         }
     }
 

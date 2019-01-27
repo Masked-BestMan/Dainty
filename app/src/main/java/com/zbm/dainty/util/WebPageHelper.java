@@ -1,7 +1,7 @@
 package com.zbm.dainty.util;
 
 
-import com.zbm.dainty.ui.WebViewFragment;
+import com.zbm.dainty.main.WebViewFragment;
 
 import java.util.LinkedList;
 import java.util.List;

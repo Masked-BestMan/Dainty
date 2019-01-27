@@ -1,4 +1,4 @@
-package com.zbm.dainty.ui;
+package com.zbm.dainty.main;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
@@ -40,9 +40,8 @@ import java.util.List;
 public class WebViewFragment extends android.support.v4.app.Fragment{
     public final static int LOAD_IN_NEW_WINDOW = 0;
     public final static int LOAD_IN_BACKGROUND = 1;
-    public final static int FREE_REPLICATION = 2;
-    public final static int COPY_LINK = 3;
-    public final static int DOWNLOAD_IMAGE = 4;
+    public final static int COPY_LINK = 2;
+    public final static int DOWNLOAD_IMAGE = 3;
 
     private Bundle bundle;
     private OnWebViewListener wl;
@@ -294,7 +293,6 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
         List<String> data=new ArrayList<>();
         data.add("新窗口打开");
         data.add("后台打开");
-        data.add("自由复制");
         data.add("复制链接");
         popupMenuList=pop_layout.findViewById(R.id.popup_menu_list);
         PopupMenuListAdapter adapter=new PopupMenuListAdapter(getActivity(),data);
@@ -310,9 +308,6 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
                         wl.onQuickActionClick(webView, LOAD_IN_BACKGROUND, extra);
                         break;
                     case 2:
-                        wl.onQuickActionClick(webView, FREE_REPLICATION, extra);
-                        break;
-                    case 3:
                         wl.onQuickActionClick(webView, COPY_LINK, extra);
                         break;
                 }

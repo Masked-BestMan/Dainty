@@ -1,4 +1,4 @@
-package com.zbm.dainty.ui;
+package com.zbm.dainty.login;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zbm.dainty.R;
-import com.zbm.dainty.util.HttpUtil;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.LoadingDialog;
 import com.zbm.dainty.widget.SwipeBackActivity;
@@ -23,12 +22,9 @@ import com.zbm.dainty.widget.SwipeBackActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 
-public class RegisterActivity extends SwipeBackActivity {
-    @BindView(R.id.register_back)
-    Button registerBack;
+public class RegisterActivity extends SwipeBackActivity implements LoginRegisterContract.View{
+
     @BindView(R.id.title)
     TextView tvTitle;
     @BindView(R.id.account)
@@ -43,16 +39,18 @@ public class RegisterActivity extends SwipeBackActivity {
     View registerBarTheme;
 
     private InputMethodManager inputMethodManager;
-    private CompositeDisposable disposable;
     private LoadingDialog dialog;
     private int type;
+    private LoginRegisterPresenter presenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
-        disposable=new CompositeDisposable();
+
+        SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
+        registerBarTheme.setBackgroundColor(Color.parseColor(preferences.getString("theme_color","#474747")));
         inputMethodManager= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         /*
          * type=0 注册 type=1 修改密码
@@ -68,8 +66,8 @@ public class RegisterActivity extends SwipeBackActivity {
             btnRegister.setText(getString(R.string.modify_button_title));
         }
 
-        SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
-        registerBarTheme.setBackgroundColor(Color.parseColor(preferences.getString("theme_color","#474747")));
+        presenter=new LoginRegisterPresenter(this);
+        dialog=new LoadingDialog(this,"注册中");
     }
 
     @OnClick({R.id.register_back,R.id.btn_register})
@@ -85,21 +83,13 @@ public class RegisterActivity extends SwipeBackActivity {
                     return;
                 }
                 dialog.show();
-                disposable.add(HttpUtil.getInstance().checkLogin(type+1,etAccount.getText().toString()
-                        ,etOldPassword.getText().toString(),etNewPassword.getText().toString())
-                        .subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(String s) {
-                        Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        dialog.dismiss();
-                        Toast.makeText(RegisterActivity.this, "请检查网络", Toast.LENGTH_SHORT).show();
-                    }
-                }));
+                if (type==0) {
+                    presenter.register(etAccount.getText().toString(), etOldPassword.getText()
+                            .toString(), etNewPassword.getText().toString());
+                }else {
+                    presenter.modifyPassword(etAccount.getText().toString(), etOldPassword
+                            .getText().toString(), etNewPassword.getText().toString());
+                }
                 break;
         }
     }
@@ -107,9 +97,18 @@ public class RegisterActivity extends SwipeBackActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        disposable.clear();
+        presenter.unsubscribe();
         if (MyUtil.isSoftInputMethodShowing(this)) {
             inputMethodManager.toggleSoftInput(0,InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
+
+    @Override
+    public void showToast(String msg) {
+        dialog.dismiss();
+        Toast.makeText(RegisterActivity.this, msg, Toast.LENGTH_SHORT).show();
+        if (msg.contains("成功")){
+            finish();
         }
     }
 }

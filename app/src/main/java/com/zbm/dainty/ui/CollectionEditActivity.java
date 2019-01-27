@@ -21,6 +21,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.zbm.dainty.main.MainActivity;
 import com.zbm.dainty.widget.CircleImageView;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.util.MyUtil;

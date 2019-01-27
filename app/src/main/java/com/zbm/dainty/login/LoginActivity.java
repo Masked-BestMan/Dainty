@@ -1,4 +1,4 @@
-package com.zbm.dainty.ui;
+package com.zbm.dainty.login;
 
 
 import android.content.Context;
@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zbm.dainty.util.HttpUtil;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.R;
 import com.zbm.dainty.widget.LoadingDialog;
@@ -23,15 +22,13 @@ import com.zbm.dainty.widget.SwipeBackActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 
 
 /**
  * Created by Zbm阿铭 on 2017/5/10.
  */
 
-public class LoginActivity extends SwipeBackActivity {
+public class LoginActivity extends SwipeBackActivity implements LoginRegisterContract.View{
     @BindView(R.id.account)
     EditText account;
     @BindView(R.id.password)
@@ -48,16 +45,16 @@ public class LoginActivity extends SwipeBackActivity {
     View loginBarTheme;
 
     private InputMethodManager inputMethodManager;
-    private CompositeDisposable disposable;
     private LoadingDialog dialog;
+    private LoginRegisterPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        disposable=new CompositeDisposable();
         dialog=new LoadingDialog(this,"登录中");
+        presenter=new LoginRegisterPresenter(this);
         inputMethodManager= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,26 +70,7 @@ public class LoginActivity extends SwipeBackActivity {
                     return;
                 }
                 dialog.show();
-                disposable.add(HttpUtil.getInstance().checkLogin(0,account.getText().toString()
-                        , password.getText().toString(),null).subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(String s) {
-                        dialog.dismiss();
-                        Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
-                        if (s.equals("登录成功")) {
-                            Intent intent = new Intent();
-                            intent.putExtra("username", account.getText().toString());
-                            setResult(RESULT_OK, intent);
-                            finish();
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        dialog.dismiss();
-                        Toast.makeText(LoginActivity.this, "请检查网络", Toast.LENGTH_SHORT).show();
-                    }
-                }));
+                presenter.login(account.getText().toString(),password.getText().toString());
             }
         });
         registerButton.setOnClickListener(new View.OnClickListener() {
@@ -120,10 +98,20 @@ public class LoginActivity extends SwipeBackActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        disposable.clear();
+        presenter.unsubscribe();
         if (MyUtil.isSoftInputMethodShowing(this)) {
             inputMethodManager.toggleSoftInput(0,InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
 
+    @Override
+    public void showToast(String msg) {
+        Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+        if (msg.contains("成功")){
+            Intent intent = new Intent();
+            intent.putExtra("username", account.getText().toString());
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
 }
