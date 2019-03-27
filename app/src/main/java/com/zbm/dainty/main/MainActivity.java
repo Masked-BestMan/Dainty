@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-//    @BindView(R.id.head_portrait)
+    //    @BindView(R.id.head_portrait)
 //    CircleImageView headPortraitView;
     @BindView(R.id.tv_username)
     TextView tvUserName;
@@ -220,7 +220,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 default:
                     url = intent.getStringExtra("shortcut_url");
-                    webView.loadUrl(url);
+                    if (webView != null) {
+                        webView.loadUrl(url);
+                    }
             }
     }
 
@@ -352,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDrawerClosed(View drawerView) {
                 switch (selectMenuPosition) {
                     case -1:
-                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class),2);
+                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), 2);
                         break;
                     case 0:
                         webView.loadUrl("http://dushu.m.baidu.com");
@@ -731,7 +733,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver networkChange = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ConnectivityManager connectivityManager = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             assert connectivityManager != null;
             NetworkInfo info = connectivityManager.getActiveNetworkInfo();
             if (info != null && info.isAvailable()) {
@@ -751,9 +753,9 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         @Override
         public void onReceive(Context context, Intent intent) {
-            WeatherInfoBean bean= (WeatherInfoBean) intent.getSerializableExtra("content");
+            WeatherInfoBean bean = (WeatherInfoBean) intent.getSerializableExtra("content");
             now_temperature.setText(bean.getTemperature());
-            city.setText(bean.getClimate());
+            city.setText(bean.getCity());
         }
     };
 
