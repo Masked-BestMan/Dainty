@@ -1,10 +1,11 @@
 package com.zbm.dainty.bean;
 
 public class HistoryPositionBean {
-    private int child,parent;
-    public HistoryPositionBean(int child,int parent){
-        this.child=child;
-        this.parent=parent;
+    private int child, parent;
+
+    public HistoryPositionBean(int child, int parent) {
+        this.child = child;
+        this.parent = parent;
     }
 
     public int getChild() {
@@ -17,15 +18,20 @@ public class HistoryPositionBean {
 
     @Override
     public String toString() {
-        return parent+" "+child;
+        return parent + " " + child;
+    }
+
+    @Override
+    public int hashCode() {
+        return child + parent;
     }
 
     @Override
     public boolean equals(Object obj) {
         HistoryPositionBean positionBean;
         if (obj instanceof HistoryPositionBean) {
-            positionBean= (HistoryPositionBean) obj;
-            return child==positionBean.child&&parent==positionBean.parent;
+            positionBean = (HistoryPositionBean) obj;
+            return child == positionBean.child && parent == positionBean.parent;
         } else
             return super.equals(obj);
     }

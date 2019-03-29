@@ -24,9 +24,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class DaintyDBHelper extends SQLiteOpenHelper {
     private static DaintyDBHelper helper = null;
+    private Executor executor;
     /*
     queryTYPE为搜索类型：url网址；word内容
      */
@@ -94,6 +97,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
 
     private DaintyDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
+        executor=Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -122,7 +126,7 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
 
     public void searchHistoryTable(OnSearchHistoryTableListener hl) {
         hlReference = new WeakReference<>(hl);
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
@@ -188,12 +192,17 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 mHandler.sendMessage(mHandler.obtainMessage(1, mHistoryData));
                 Log.d("aaa", "日期:" + mHistoryData);
             }
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).start();
     }
 
     public void updateHistoryTable(final String url, final String title) {
-
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 SQLiteDatabase db = helper.getWritableDatabase();
@@ -208,13 +217,19 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 }
                 Log.d("DBHelper", "记录成功");
             }
-
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//
+//        }).start();
     }
 
     public void searchCollectionTable(OnSearchCollectionTableListener cl) {
         clReference = new WeakReference<>(cl);
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 ArrayList<Map<String, Object>> searchResult = new ArrayList<>();
@@ -236,12 +251,18 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 mCursor.close();
                 mHandler.sendMessage(mHandler.obtainMessage(2, searchResult));
             }
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).start();
 
     }
 
     public void updateCollectionTable(final byte[] icon, final String url, final String title) {
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 String collectionTime = format.format(new Date(System.currentTimeMillis()));
@@ -259,13 +280,19 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 }
                 Log.d("DBHelper", "收藏成功");
             }
-
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//
+//        }).start();
     }
 
     public void searchQueryTable(final String sql, OnSearchQueryTableListener ql) {
         qlReference = new WeakReference<>(ql);
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 ArrayList<QueryItemBean> searchResult = new ArrayList<>();
@@ -282,11 +309,17 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 mCursor.close();
                 mHandler.sendMessage(mHandler.obtainMessage(3, searchResult));
             }
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).start();
     }
 
     public void updateQueryTable(final String text, final boolean isURL) {
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 String queryTime = format.format(new Date(System.currentTimeMillis()));
@@ -304,13 +337,20 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                     e.printStackTrace();
                 }
             }
+        });
 
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//
+//        }).start();
     }
 
     public void searchDownloadTable(final String sql, OnSearchDownloadTableListener dl) {
         dlReference = new WeakReference<>(dl);
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 ArrayList<FileDownloadBean> searchResult = new ArrayList<>();
@@ -336,12 +376,19 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 mCursor.close();
                 mHandler.sendMessage(mHandler.obtainMessage(4, searchResult));
             }
-        }).start();
+        });
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).start();
 
     }
 
     public void updateDownloadTable(final String url, final String path, final String name, final int size, final int length, final long time) {
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 SQLiteDatabase db = getDatabase();
@@ -352,11 +399,17 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).start();
     }
 
     public void deleteTableItem(final String table, final String where) {
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 SQLiteDatabase db = getDatabase();
@@ -365,7 +418,13 @@ public class DaintyDBHelper extends SQLiteOpenHelper {
                 else
                     db.execSQL("delete from " + table);
             }
-        }).start();
+        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).start();
     }
 
     public interface OnSearchHistoryTableListener {
