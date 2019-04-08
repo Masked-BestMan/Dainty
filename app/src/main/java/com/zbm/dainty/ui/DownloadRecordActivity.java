@@ -1,6 +1,8 @@
 package com.zbm.dainty.ui;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -13,6 +15,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
@@ -96,9 +99,9 @@ public class DownloadRecordActivity extends SwipeBackActivity {
         super.onCreate(savedInstanceState);
         //startService(new Intent(this, FileListenerService.class));
         setContentView(R.layout.activity_download_record);
-//        IntentFilter mFilter = new IntentFilter();
-//        mFilter.addAction("download_progress_refresh");
-        //LocalBroadcastManager.getInstance(this).registerReceiver(downloadStatus, mFilter);
+        IntentFilter mFilter = new IntentFilter();
+        mFilter.addAction("download_progress_refresh");
+        LocalBroadcastManager.getInstance(this).registerReceiver(downloadStatus, mFilter);
 
         ButterKnife.bind(this);
         initData();
@@ -117,7 +120,7 @@ public class DownloadRecordActivity extends SwipeBackActivity {
     protected void onDestroy() {
         super.onDestroy();
         //stopService(new Intent(this,FileListenerService.class));
-        //LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadStatus);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadStatus);
         if (timer != null) {
             timer.cancel();
         }
@@ -482,14 +485,14 @@ public class DownloadRecordActivity extends SwipeBackActivity {
 //    /*
 //    每隔一秒发送一次广播
 //     */
-//    private BroadcastReceiver downloadStatus = new BroadcastReceiver() {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (intent.getBooleanExtra("finish_download", false)) {
-//                initData();
-//            }
-//        }
-//    };
+    private BroadcastReceiver downloadStatus = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getBooleanExtra("finish_download", false)) {
+                initData();
+            }
+        }
+    };
 
 }

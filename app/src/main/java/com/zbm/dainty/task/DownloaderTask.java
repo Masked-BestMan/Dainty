@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -179,7 +180,7 @@ public class DownloaderTask extends AsyncTask<String, Integer, String> {
         Intent intent = new Intent();
         intent.setAction("download_progress_refresh");
         intent.putExtra("finish_download", true);
-        context.sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         DownloadHelper.downloadList.remove(this);
 
     }
