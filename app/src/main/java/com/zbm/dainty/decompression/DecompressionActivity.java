@@ -46,25 +46,8 @@ public class DecompressionActivity extends SwipeBackActivity implements Decompre
     private String handleFilePath;
     private List<Object> data = new ArrayList<>();
     private String type;
-//    private MyHandler handler;
     private DecompressionPresenter presenter;
 
-//    private static class MyHandler extends Handler {
-//        WeakReference<DecompressionActivity> reference;
-//
-//        MyHandler(DecompressionActivity activity) {
-//            reference = new WeakReference<>(activity);
-//        }
-//
-//        @Override
-//        public void handleMessage(Message msg) {
-//            super.handleMessage(msg);
-//            if (msg.what == 1 && reference.get() != null) {
-//                reference.get().mDialog.dismiss();
-//                reference.get().adapter.notifyDataSetChanged();
-//            }
-//        }
-//    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,72 +80,13 @@ public class DecompressionActivity extends SwipeBackActivity implements Decompre
         switch (FileUtil.getExtensionName(handleFilePath)) {
             case "zip":
                 type = "zip";
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        ZipFile zipFile = null;
-//                        try {
-//                            zipFile = new ZipFile(handleFilePath, "GBK");
-//                            Enumeration<ZipEntry> entries = zipFile.getEntries();
-//                            while (entries.hasMoreElements()) {
-//                                ZipEntry entry = entries.nextElement();
-//                                if (!entry.isDirectory()) {
-//                                    data.add(entry);
-//                                }
-//                            }
-//                            handler.sendEmptyMessage(1);
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        } finally {
-//                            if (zipFile != null) {
-//                                try {
-//                                    zipFile.close();
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        }
-//                    }
-//                }).start();
                 presenter.resolveZip(handleFilePath);
                 break;
             case "rar":
                 type = "rar";
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        Archive rarFile = null;
-//                        try {
-//                            rarFile = new Archive(new File(handleFilePath));
-//                            FileHeader fh = rarFile.nextFileHeader();
-//                            while (fh != null) {
-//
-//                                if (!fh.isDirectory()) {
-//                                    data.add(fh);
-//                                }
-//                                fh = rarFile.nextFileHeader();
-//                            }
-//                            handler.sendEmptyMessage(1);
-//                        } catch (RarException | IOException e) {
-//                            e.printStackTrace();
-//                        } finally {
-//                            if (rarFile != null) {
-//                                try {
-//                                    rarFile.close();
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//
-//                        }
-//                    }
-//                }).start();
                 presenter.resolveRar(handleFilePath);
                 break;
         }
-//        handler = new MyHandler(this);
     }
 
     @SuppressLint("SetTextI18n")
@@ -181,8 +105,6 @@ public class DecompressionActivity extends SwipeBackActivity implements Decompre
         decompressionFileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                new ResolveFileContentTask(DecompressionActivity.this, handleFilePath, type)
-//                        .execute(data.get(position));
                 presenter.resolveFileContent(type,handleFilePath,data.get(position));
             }
         });
@@ -190,10 +112,6 @@ public class DecompressionActivity extends SwipeBackActivity implements Decompre
         decompressionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                new ZipRarExtractorTask(DecompressionActivity.this, type, handleFilePath,
-//                        FileUtil.getDirFromPath(handleFilePath) + File.separator +
-//                                FileUtil.getFileNameNoEx(FileUtil.getFileNameFromPath(handleFilePath)),
-//                        false).execute();
                 presenter.decompression(type,handleFilePath,FileUtil.getDirFromPath(handleFilePath) + File.separator +
                                 FileUtil.getFileNameNoEx(FileUtil.getFileNameFromPath(handleFilePath)),
                         false);

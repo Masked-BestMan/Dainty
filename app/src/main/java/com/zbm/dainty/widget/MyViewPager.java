@@ -12,7 +12,7 @@ import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 
-import com.zbm.dainty.bean.MessageEvent;
+import com.zbm.dainty.bean.WebDeleteEvent;
 import com.zbm.dainty.util.WebPageHelper;
 
 import org.greenrobot.eventbus.EventBus;
@@ -89,7 +89,7 @@ public class MyViewPager extends ViewPager implements OnGestureListener{
                 Log.d("trr","frameLayout:"+frameLayout
                         .getTop());
                 if(Math.abs(frameLayout.getTop())>frameLayout.getWidth()/2){
-                    EventBus.getDefault().post(new MessageEvent(frameLayout.getTop()));
+                    EventBus.getDefault().post(new WebDeleteEvent(frameLayout.getTop()));
 
                 }else {
                     ObjectAnimator objectAnimator=ObjectAnimator.ofFloat(frameLayout,"translationY",frameLayout.getTop(),0);
@@ -141,11 +141,11 @@ public class MyViewPager extends ViewPager implements OnGestureListener{
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         if(velocityY<-7000){
-            EventBus.getDefault().post(new MessageEvent(frameLayout.getTop()));
+            EventBus.getDefault().post(new WebDeleteEvent(frameLayout.getTop()));
             return true;
         }
         if(Math.abs(frameLayout.getTop())>frameLayout.getWidth()/2){
-            EventBus.getDefault().post(new MessageEvent(frameLayout.getTop()));
+            EventBus.getDefault().post(new WebDeleteEvent(frameLayout.getTop()));
         }else {
             frameLayout.layout(left,0,right,bottom);
         }

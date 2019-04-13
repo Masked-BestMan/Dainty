@@ -4,9 +4,9 @@ package com.zbm.dainty.bean;
  * Created by Zbm阿铭 on 2017/11/8.
  */
 
-public class MessageEvent {
+public class WebDeleteEvent {
     private int viewTop;
-    public MessageEvent(int top){
+    public WebDeleteEvent(int top){
         viewTop=top;
     }
     public int getViewTop(){

@@ -24,15 +24,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
@@ -46,10 +43,11 @@ import android.widget.Toast;
 
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
+import com.zbm.dainty.base.BaseActivity;
 import com.zbm.dainty.bean.WeatherInfoBean;
+import com.zbm.dainty.bean.WebFragmentLoadBean;
 import com.zbm.dainty.login.LoginActivity;
 import com.zbm.dainty.task.DownloaderTask;
-import com.zbm.dainty.task.ImageTask;
 import com.zbm.dainty.ui.CollectionEditActivity;
 import com.zbm.dainty.ui.ConfigActivity;
 import com.zbm.dainty.ui.DownloadRecordActivity;
@@ -58,7 +56,7 @@ import com.zbm.dainty.ui.QueryActivity;
 import com.zbm.dainty.util.DownloadHelper;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.adapter.MenuListAdapter;
-import com.zbm.dainty.bean.MessageEvent;
+import com.zbm.dainty.bean.WebDeleteEvent;
 import com.zbm.dainty.R;
 import com.zbm.dainty.util.WebPageHelper;
 import com.zbm.dainty.adapter.WebPageAdapter;
@@ -79,7 +77,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @BindView(R.id.home_button)
     ImageView homeButton;
@@ -105,8 +103,6 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-    //    @BindView(R.id.head_portrait)
-//    CircleImageView headPortraitView;
     @BindView(R.id.tv_username)
     TextView tvUserName;
     @BindView(R.id.progress_bar)
@@ -147,20 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setTheme(R.style.AppTheme_TransparentActivity);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                    | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            );
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        super.onCreate(savedInstanceState);
 
         //网络状态变化广播监听
         IntentFilter mFilter = new IntentFilter();
@@ -286,14 +270,14 @@ public class MainActivity extends AppCompatActivity {
             List<Bundle> bundles = savedInstanceState.getParcelableArrayList("web_page_bundle");
             int count = savedInstanceState.getInt("web_page_count");
             for (int i = 0; i < count; i++) {
-                WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null, initWebView());
+                WebViewFragment fragment = new WebViewFragment(bundles != null ? bundles.get(i) : null);
                 WebPageHelper.webpagelist.add(fragment);
             }
             initDot(count);
         } else {
             String url = getIntent().getStringExtra("shortcut_url");
             Log.d("Main", "onCreate地址Path：" + url);
-            WebViewFragment fragment = new WebViewFragment(null, initWebView(), url);
+            WebViewFragment fragment = new WebViewFragment(null, url);
             WebPageHelper.webpagelist.add(fragment);
             initDot(1);
         }
@@ -455,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
                 if (WebPageHelper.webpagelist.size() >= WebPageHelper.WEB_PAGE_LIMIT_NUM) {
                     Toast.makeText(this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
                 } else {
-                    WebViewFragment fragment = new WebViewFragment(null, initWebView());
+                    WebViewFragment fragment = new WebViewFragment(null);
                     WebPageHelper.webpagelist.add(mViewPager.getCurrentItem() + 1, fragment);
                     webpageAdapter.notifyDataSetChanged();
                     initDot(WebPageHelper.webpagelist.size());
@@ -543,109 +527,75 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private WebViewFragment.OnWebViewListener initWebView() {
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onGetWebView(MingWebView webView){
+        if (first) {
+            //调用代表为新添加的webview
+            MainActivity.this.webView = webView;
+            first = false;
+        }
 
-        return new WebViewFragment.OnWebViewListener() {
+        webView.setOnScrollChangedCallback(new MingWebView.OnScrollChangedCallback() {
             @Override
-            public void onGetWebView(final MingWebView webView) {
-                //调用代表为新添加的webview
-
-                if (first) {
-                    MainActivity.this.webView = webView;
-                    first = false;
-                }
-
-                webView.setOnScrollChangedCallback(new MingWebView.OnScrollChangedCallback() {
-                    @Override
-                    public void onScroll(int dx, int dy) {
-                        webLayout.scrollBy(0, dy);
-                    }
-                });
-                Log.d("Dainty", "调用getView:" + MainActivity.this.webView);
+            public void onScroll(int dx, int dy) {
+                webLayout.scrollBy(0, dy);
             }
-
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                webLayout.scrollTo(0, 0);
-                progressBar.setVisibility(View.VISIBLE);
-                backButton.setEnabled(false);
-                nextButton.setEnabled(false);
-                freshenButton.setVisibility(View.INVISIBLE);
-                stopLoading.setVisibility(View.VISIBLE);
-                menuAdapter.setAllowCollect(false);
-                menuAdapter.isEnabled(3);
-                menuAdapter.notifyDataSetInvalidated();
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-
-            }
-
-            @Override
-            public void onProgressChanged(WebView webView, int i) {
-                if (i > 80) {
-                    //进度大于80，一般网页就加载完成了,但是为了能够在点击收藏标签前收到icon，必须等到加载完成到100
-                    progressBar.setVisibility(View.GONE);
-                    freshenButton.setVisibility(View.VISIBLE);
-                    stopLoading.setVisibility(View.INVISIBLE);
-                    if (!webView.canGoBack()) {
-                        backButton.setEnabled(false);
-                    } else {
-                        backButton.setEnabled(true);
-                    }
-                    if (!webView.canGoForward()) {
-                        nextButton.setEnabled(false);
-                    } else {
-                        nextButton.setEnabled(true);
-                    }
-                    menuAdapter.setAllowCollect(true);
-                    menuAdapter.isEnabled(3);
-                    menuAdapter.notifyDataSetInvalidated();
-
-                } else {
-                    progressBar.setProgress(i);
-                }
-            }
-
-            @Override
-            public void onQuickActionClick(WebView webView, int itemId, String extra) {
-                switch (itemId) {
-                    case WebViewFragment.LOAD_IN_NEW_WINDOW:
-                        if (WebPageHelper.webpagelist.size() >= WebPageHelper.WEB_PAGE_LIMIT_NUM) {
-                            Toast.makeText(MainActivity.this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
-                        } else {
-                            WebViewFragment fragment = new WebViewFragment(null, initWebView(), extra);
-                            WebPageHelper.webpagelist.add(mViewPager.getCurrentItem() + 1, fragment);
-                            webpageAdapter.notifyDataSetChanged();
-                            initDot(WebPageHelper.webpagelist.size());
-                            mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
-                        }
-                        break;
-                    case WebViewFragment.LOAD_IN_BACKGROUND:
-                        if (WebPageHelper.webpagelist.size() >= WebPageHelper.WEB_PAGE_LIMIT_NUM) {
-                            Toast.makeText(MainActivity.this, "窗口数量超过最大值", Toast.LENGTH_SHORT).show();
-                        } else {
-                            WebViewFragment fragment = new WebViewFragment(null, initWebView(), extra);
-                            WebPageHelper.webpagelist.add(mViewPager.getCurrentItem() + 1, fragment);
-                            webpageAdapter.notifyDataSetChanged();
-                            initDot(WebPageHelper.webpagelist.size());
-                        }
-                        break;
-                    case WebViewFragment.COPY_LINK:
-                        break;
-                    case WebViewFragment.DOWNLOAD_IMAGE:
-                        new ImageTask(MainActivity.this).execute(extra);
-                        break;
-                }
-            }
-        };
+        });
     }
 
-    @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onMessageEvent(MessageEvent event) {
+    public void onPageStarted(String url){
+        webLayout.scrollTo(0, 0);
+        progressBar.setVisibility(View.VISIBLE);
+        backButton.setEnabled(false);
+        nextButton.setEnabled(false);
+        freshenButton.setVisibility(View.INVISIBLE);
+        stopLoading.setVisibility(View.VISIBLE);
+        menuAdapter.setAllowCollect(false);
+        menuAdapter.isEnabled(3);
+        menuAdapter.notifyDataSetInvalidated();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProgressChanged(Integer progress){
+        if (progress > 80) {
+            //进度大于80，一般网页就加载完成了,但是为了能够在点击收藏标签前收到icon，必须等到加载完成到100
+            progressBar.setVisibility(View.GONE);
+            freshenButton.setVisibility(View.VISIBLE);
+            stopLoading.setVisibility(View.INVISIBLE);
+            if (!webView.canGoBack()) {
+                backButton.setEnabled(false);
+            } else {
+                backButton.setEnabled(true);
+            }
+            if (!webView.canGoForward()) {
+                nextButton.setEnabled(false);
+            } else {
+                nextButton.setEnabled(true);
+            }
+            menuAdapter.setAllowCollect(true);
+            menuAdapter.isEnabled(3);
+            menuAdapter.notifyDataSetInvalidated();
+
+        } else {
+            progressBar.setProgress(progress);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onWebFragmentLoad(WebFragmentLoadBean loadBean){
+        WebViewFragment fragment = new WebViewFragment(null, loadBean.getUrl());
+        WebPageHelper.webpagelist.add(mViewPager.getCurrentItem() + 1, fragment);
+        webpageAdapter.notifyDataSetChanged();
+        initDot(WebPageHelper.webpagelist.size());
+        if (loadBean.getLoadInMode()==WebViewFragment.LOAD_IN_NEW_WINDOW){
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onWebFragmentDelete(WebDeleteEvent event) {
         //删除动画
         int viewTop = event.getViewTop();
         int value;
@@ -659,19 +609,17 @@ public class MainActivity extends AppCompatActivity {
         animation.setDuration(400);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
+            public void onAnimationStart(Animation animation) { }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerContainer().removeAllViews();
-                WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView().destroy();
+//                WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerContainer().removeAllViews();
+//                WebPageHelper.webpagelist.get(mViewPager.getCurrentItem()).getInnerWebView().destroy();
                 WebPageHelper.webpagelist.remove(mViewPager.getCurrentItem());
                 webpageAdapter.notifyDataSetChanged();
                 if (WebPageHelper.webpagelist.size() == 0) {
                     first = true;
-                    WebViewFragment fragment = new WebViewFragment(null, initWebView());
+                    WebViewFragment fragment = new WebViewFragment(null);
                     WebPageHelper.webpagelist.add(fragment);
                     webpageAdapter.notifyDataSetChanged();
                     ZoomChange(1);

@@ -1,6 +1,7 @@
 package com.zbm.dainty.adapter;
 
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 
 import com.zbm.dainty.util.WebPageHelper;
 import com.zbm.dainty.main.WebViewFragment;
@@ -9,7 +10,7 @@ import com.zbm.dainty.main.WebViewFragment;
  * Created by Zbm阿铭 on 2017/11/2.
  */
 
-public class WebPageAdapter extends UpdatableFragmentPagerAdapter {
+public class WebPageAdapter extends FragmentPagerAdapter {
     //private FragmentManager fm;
     //public static final int ADD_PAGE=0;
     //public static final int DELETE_PAGE=1;

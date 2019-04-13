@@ -1,6 +1,9 @@
 package com.zbm.dainty.main;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
@@ -28,10 +31,14 @@ import com.tencent.smtt.sdk.WebViewClient;
 import com.zbm.dainty.DaintyApplication;
 import com.zbm.dainty.R;
 import com.zbm.dainty.adapter.PopupMenuListAdapter;
+import com.zbm.dainty.bean.WebFragmentLoadBean;
+import com.zbm.dainty.task.ImageTask;
 import com.zbm.dainty.task.ResolveDownloadUrlTask;
 import com.zbm.dainty.util.DaintyDBHelper;
 import com.zbm.dainty.util.MyUtil;
 import com.zbm.dainty.widget.MingWebView;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +47,8 @@ import java.util.List;
 public class WebViewFragment extends android.support.v4.app.Fragment{
     public final static int LOAD_IN_NEW_WINDOW = 0;
     public final static int LOAD_IN_BACKGROUND = 1;
-    public final static int COPY_LINK = 2;
-    public final static int DOWNLOAD_IMAGE = 3;
 
     private Bundle bundle;
-    private OnWebViewListener wl;
     private MingWebView webView;
     private View cache;
     private FrameLayout webViewContainer;
@@ -53,18 +57,16 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
     private RecyclerView popupMenuList;
     private String extra, url="file:///android_asset/index.html";
 
-    public WebViewFragment() {
+    public WebViewFragment() { }
+
+    @SuppressLint("ValidFragment")
+    public WebViewFragment(Bundle savedInstanceState) {
+        this(savedInstanceState,null);
     }
 
     @SuppressLint("ValidFragment")
-    public WebViewFragment(Bundle savedInstanceState, OnWebViewListener onWebViewListener) {
-        this(savedInstanceState, onWebViewListener, null);
-    }
-
-    @SuppressLint("ValidFragment")
-    public WebViewFragment(Bundle savedInstanceState, OnWebViewListener onWebViewListener, String url) {
+    public WebViewFragment(Bundle savedInstanceState, String url) {
         bundle = savedInstanceState;  //为空表示是用户手动添加标签页
-        this.wl = onWebViewListener;
         if (url!=null)
             this.url = url;
     }
@@ -73,7 +75,6 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
-        Log.d("WP", "Fragment onSavedInstance");
     }
 
 
@@ -81,7 +82,6 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d("WP", "调用onCreateView cache :" + cache);
         if (cache == null) {
             cache = inflater.inflate(R.layout.webview_fragment, container, false);
             webView = cache.findViewById(R.id.web_view);   //TBS WebView必须在布局中创建，否则网页视频无法全屏
@@ -90,10 +90,8 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
             webView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public void onReceivedTitle(WebView view, String title) {
-                    //if (wl != null) wl.onReceivedTitle(view, title);
                     if (!title.equals("") && !title.contains("https") && !title.contains("http")) {
                         DaintyDBHelper.getDaintyDBHelper(getActivity()).updateHistoryTable(view.getUrl(), title);
-                        Log.d("web_view", title + " " + view.getUrl());
                     }
                     super.onReceivedTitle(view, title);
                 }
@@ -101,8 +99,8 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
 
                 @Override
                 public void onProgressChanged(WebView webView, int i) {
-                    if (wl != null) wl.onProgressChanged(webView, i);
                     super.onProgressChanged(webView, i);
+                    EventBus.getDefault().post(i);
                 }
             });
 
@@ -120,19 +118,16 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     blockAds(view);//过滤
-                    Log.d("appo", "onPageFinished" + url);
                 }
 
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                    Log.d("appo", "onPageStarted" + url);
-                    if (wl != null) wl.onPageStarted(view, url, favicon);
                     super.onPageStarted(view, url, favicon);
+                    EventBus.getDefault().post(url);
                 }
 
                 @Override
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    if (wl != null) wl.onReceivedError(view, errorCode, description, failingUrl);
                     super.onReceivedError(view, errorCode, description, failingUrl);
                 }
             });
@@ -145,7 +140,6 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
                     Log.d("Ming", resultType + "");
                     boolean showCustomPopup=false;
 
-                    //int xOff, yOff;
                     switch (resultType) {
                         case WebView.HitTestResult.SRC_ANCHOR_TYPE:
                             initLoadingWebQuickAction();
@@ -196,8 +190,7 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
             else
                 webView.loadUrl(url);
 
-            if (wl != null)
-                wl.onGetWebView(webView);  //新添加的fragment
+            EventBus.getDefault().post(webView); //新添加的fragment
             webViewContainer = cache.findViewById(R.id.frame_layout);
 
         }
@@ -273,20 +266,6 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
     }
 
 
-    public interface OnWebViewListener {
-        void onGetWebView(MingWebView webView);
-
-        //void onReceivedTitle(WebView view, String title);
-
-        void onPageStarted(WebView view, String url, Bitmap favicon);
-
-        void onReceivedError(WebView view, int errorCode, String description, String failingUrl);
-
-        void onProgressChanged(WebView webView, int i);
-
-        void onQuickActionClick(WebView webView, int itemId, String extra);
-    }
-
     private void initLoadingWebQuickAction() {
         @SuppressLint("InflateParams")
         View pop_layout = LayoutInflater.from(getActivity()).inflate(R.layout.popup_menu, null);
@@ -302,13 +281,13 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
                 quickAction.dismiss();
                 switch (position){
                     case 0:
-                        wl.onQuickActionClick(webView, LOAD_IN_NEW_WINDOW, extra);
+                        EventBus.getDefault().post(new WebFragmentLoadBean(LOAD_IN_NEW_WINDOW,extra));
                         break;
                     case 1:
-                        wl.onQuickActionClick(webView, LOAD_IN_BACKGROUND, extra);
+                        EventBus.getDefault().post(new WebFragmentLoadBean(LOAD_IN_BACKGROUND,extra));
                         break;
                     case 2:
-                        wl.onQuickActionClick(webView, COPY_LINK, extra);
+                        copyToClipboard();
                         break;
                 }
             }
@@ -342,10 +321,10 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
                 quickAction.dismiss();
                 switch (position){
                     case 0:
-                        wl.onQuickActionClick(webView, DOWNLOAD_IMAGE, extra);
+                        new ImageTask(getContext()).execute(extra);
                         break;
                     case 1:
-                        wl.onQuickActionClick(webView,COPY_LINK, extra);
+                        copyToClipboard();
                         break;
                 }
             }
@@ -363,6 +342,16 @@ public class WebViewFragment extends android.support.v4.app.Fragment{
         //获取PopWindow宽和高
         mHeight = pop_layout.getMeasuredHeight();
         mWidth = pop_layout.getMeasuredWidth();
+    }
+
+    private void copyToClipboard(){
+        ClipboardManager cm = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData mClipData = ClipData.newPlainText("copy_link", extra);
+        if (cm!=null) {
+            cm.setPrimaryClip(mClipData);
+        }else {
+            Toast.makeText(getContext(),"不支持复制功能",Toast.LENGTH_SHORT).show();
+        }
     }
 }
 
