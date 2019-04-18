@@ -50,6 +50,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
+    implementation ('com.github.hotchemi:permissionsdispatcher:2.4.0'){
+        exclude module:"support-v13"
+    }
     implementation 'io.reactivex.rxjava2:rxjava:2.2.5'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
@@ -67,4 +70,5 @@ dependencies {
     implementation files('libs/java-unrar-0.5.jar')
 
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.4.0'
 }

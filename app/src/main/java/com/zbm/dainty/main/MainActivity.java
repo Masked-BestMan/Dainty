@@ -8,19 +8,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -76,7 +72,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.RuntimePermissions;
 
+@RuntimePermissions
 public class MainActivity extends BaseActivity {
 
     @BindView(R.id.home_button)
@@ -167,9 +168,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            initPermission();
-
+        MainActivityPermissionsDispatcher.getWeatherPermissionWithCheck(this);
         EventBus.getDefault().register(this);
     }
 
@@ -240,30 +239,40 @@ public class MainActivity extends BaseActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(refresh);
     }
 
-    private void initPermission() {
-        String[] permissions = {
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        ArrayList<String> toApplyList = new ArrayList<>();
-
-        for (String perm : permissions) {
-            if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, perm)) {
-                toApplyList.add(perm);
-                // 进入到这里代表没有权限.
-
-            }
-        }
-        String tmpList[] = new String[toApplyList.size()];
-        if (!toApplyList.isEmpty()) {
-            ActivityCompat.requestPermissions(this, toApplyList.toArray(tmpList), 121);
-        } else {
-            startService(new Intent(this, WeatherService.class));
-        }
-
+    @NeedsPermission({Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    public void getWeatherPermission(){
+        startService(new Intent(this, WeatherService.class));
     }
+
+    @OnPermissionDenied({Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    public void weatherPermissionDenied(){
+        finish();
+    }
+
+    @OnNeverAskAgain({Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    public void weatherPermissionNeverAsk(){
+        MyUtil.createDialog(MainActivity.this, "警告",
+                "当前应用缺少必要权限，请点击“设置”开启权限或点击“取消”关闭应用。",
+                "设置", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setData(Uri.fromParts("package", MainActivity.this.getPackageName(), null));
+                        MainActivity.this.startActivity(intent);
+                    }
+                }, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // TODO Auto-generated method stub
+                        MainActivity.this.finish();
+                    }
+                });
+    }
+
 
     private void initView(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
@@ -687,7 +696,7 @@ public class MainActivity extends BaseActivity {
             if (info != null && info.isAvailable()) {
                 String name = info.getTypeName();
                 Log.d("mark", "当前网络名称：" + name);
-                startService(new Intent(context, WeatherService.class));
+                MainActivityPermissionsDispatcher.getWeatherPermissionWithCheck(MainActivity.this);
                 if (webView != null)
                     webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
             } else {
@@ -710,39 +719,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 121) {
-            boolean isAllGranted = true;
-            // 判断是否所有的权限都已经授予了
-            for (int grant : grantResults) {
-                if (grant != PackageManager.PERMISSION_GRANTED) {
-                    isAllGranted = false;
-                    break;
-                }
-
-            }
-            if (!isAllGranted) {
-                // 如果用户拒绝授权，则弹出对话框让用户自行设置
-                MyUtil.createDialog(MainActivity.this, "警告",
-                        "当前应用缺少必要权限，请点击“设置”开启权限或点击“取消”关闭应用。",
-                        "设置", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.setData(Uri.fromParts("package", MainActivity.this.getPackageName(), null));
-                                MainActivity.this.startActivity(intent);
-                            }
-                        }, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // TODO Auto-generated method stub
-                                MainActivity.this.finish();
-                            }
-                        });
-            } else {
-                startService(new Intent(this, WeatherService.class));
-            }
-        }
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this,requestCode,grantResults);
     }
 
     private void checkDownloadTask() {
