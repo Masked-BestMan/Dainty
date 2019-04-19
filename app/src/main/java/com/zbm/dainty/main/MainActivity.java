@@ -168,7 +168,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        MainActivityPermissionsDispatcher.getWeatherPermissionWithCheck(this);
+        //MainActivityPermissionsDispatcher.getWeatherPermissionWithCheck(this);
         EventBus.getDefault().register(this);
     }
 
